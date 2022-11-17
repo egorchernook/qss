@@ -6,11 +6,11 @@
 
 #include <iostream>
 #include <cstdint>
+#include <cmath>
 
 namespace qss::models::ising
 {
-     using magn = double;
-
+    using magn = double;
     struct spin
     {
         std::int8_t value = 1;

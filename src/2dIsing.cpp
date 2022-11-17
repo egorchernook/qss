@@ -1,11 +1,14 @@
+#include <fstream>
+#include <iostream>
+#include <numeric>
+
 #include "algorithms/Metropolis.hpp"
 #include "models/ising.hpp"
 #include "lattices/2d/square.hpp"
 #include "lattices/2d/2d.hpp"
-
-#include <fstream>
-#include <iostream>
-#include <numeric>
+#include "lattices/borders_conditions.hpp"
+#include "utility/quantities.hpp"
+#include "utility/functions.hpp"
 
 std::vector<double> get_temperatures(const double T_begin = 1.5,
                                      const double T_end = 4.0,
@@ -33,48 +36,19 @@ int main()
     constexpr static std::uint32_t mcs_amount = 2'000;
     const std::vector temperatures = get_temperatures();
 
-    auto calculate_magn = [](const lattice_t &lattice) -> magn_t
-    {
-        magn_t magn{};
-        for (const auto &elem : lattice)
-        {
-            magn += static_cast<magn_t>(elem);
-        }
-        return std::abs(magn / lattice.get_amount_of_nodes());
-    };
-    auto delta_energy_f = [](const lattice_t &lattice,
-                             const lattice_t::coords_t &central,
-                             const spin_t &new_spin)
+    auto delta_energy_f =
+        [](const lattice_t &lattice_,
+           const lattice_t::coords_t &central,
+           const spin_t &new_spin)
         -> double
     {
-        auto neig = lattice.get_closest_neighbours(central);
-        // периодические граничные условия
-        for (auto &coord : neig)
-        {
-            if (coord.x == lattice.sizes.x)
-            {
-                coord.x = 0;
-            }
-            if (coord.y == lattice.sizes.y)
-            {
-                coord.y = 0;
-            }
-            if (coord.x == -1)
-            {
-                coord.x = lattice.sizes.x - 1;
-            }
-            if (coord.y == -1)
-            {
-                coord.y = lattice.sizes.y - 1;
-            }
-        }
-        // --------------------------------
-        magn_t sum{};
-        for (auto &elem : neig)
-        {
-            sum += lattice.get(elem);
-        }
-        return sum * (lattice.get(central) - new_spin);
+        const auto sum =
+            qss::get_sum_of_closest_neighbours<magn_t>(
+                lattice_,
+                central,
+                qss::lattices::two_d::use_periodic_conditions<>);
+
+        return sum * (lattice_.get(central) - new_spin);
     };
 
     std::ofstream output{"m.txt"};
@@ -85,12 +59,14 @@ int main()
         {
             if (mcs % 100 == 0)
             {
-                output << mcs << "\t" << T << "\t" << calculate_magn(lattice) << "\n";
+                output << mcs << "\t"
+                       << T << "\t"
+                       << std::abs(qss::calculate_magn<lattice_t, magn_t>(lattice))
+                       << "\n";
             }
             qss::algorithms::metropolis::make_step(lattice, delta_energy_f, T);
         }
     }
-    //output << T << "\t" << calculate_magn(lattice) << "\n";
     output.flush();
     output.close();
 

@@ -3,7 +3,6 @@
 
 #include <concepts>
 #include <type_traits>
-
 namespace qss
 {
     template <typename T>
