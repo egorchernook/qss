@@ -45,16 +45,15 @@ namespace qss::lattices::two_d
         {
             this->shrink_to_fit();
         }
-
-        constexpr square(const node_t &initial_spin, const sizes_t &sizes_) 
+        constexpr square(const node_t &initial_spin, const sizes_t &sizes_)
             : square{initial_spin, sizes_.x, sizes_.y} {}
         // работает когда есть default параметры конструктора node_t
-        constexpr explicit square(const sizes_t &sizes_) 
+        constexpr explicit square(const sizes_t &sizes_)
             : square{node_t{}, sizes_.x, sizes_.y} {}
 
         std::size_t get_amount_of_nodes() const
         {
-            return sizes.x * sizes.y;
+            return this->size();
         }
 
         node_t get(const coords_t &coords) const
@@ -95,8 +94,7 @@ namespace qss::lattices::two_d
         template <typename random_t = qss::random::mersenne::random_t<>>
         coords_t choose_random_node() const
         {
-            static random_t rand = random_t{qss::random::get_seed()};
-
+            static auto rand = random_t{qss::random::get_seed()};
             return coords_t{
                 static_cast<coord_size_t>(rand(0, sizes.x)),
                 static_cast<coord_size_t>(rand(0, sizes.y))};

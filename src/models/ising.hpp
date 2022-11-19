@@ -27,7 +27,8 @@ namespace qss::models::ising
             return spin{static_cast<std::int8_t>(number)};
         }
 
-        operator magn() const {
+        operator magn() const
+        {
             return static_cast<magn>(value);
         }
     };
@@ -44,7 +45,7 @@ namespace qss::models::ising
         result -= rhs.value;
         return result;
     }
-    magn scalar_multiply(const spin &lhs, const spin &rhs)
+    double scalar_multiply(const spin &lhs, const spin &rhs)
     {
         magn result = lhs.value;
         result *= rhs.value;
@@ -56,11 +57,17 @@ namespace qss::models::ising
         result *= lhs;
         return result;
     }
-    magn operator*(const spin &lhs, const int &rhs)
+    magn operator*(const double &lhs, const spin &rhs)
+    {
+        magn result = rhs.value;
+        result *= lhs;
+        return result;
+    }
+    magn operator*(const spin &lhs, const double &rhs)
     {
         return (rhs * lhs);
     }
-    
+
     std::ostream &operator<<(std::ostream &out, const spin &data)
     {
         out << "( " << data.value << " )";
