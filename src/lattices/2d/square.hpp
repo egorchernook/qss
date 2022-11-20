@@ -8,7 +8,8 @@
 #include <optional>
 
 #include "2d.hpp"
-#include "../../random.hpp"
+#include "../base_lattice.hpp"
+#include "../../random/random.hpp"
 #include "../../random/mersenne.hpp"
 
 namespace qss::lattices::two_d
@@ -23,40 +24,26 @@ namespace qss::lattices::two_d
     template <typename node_t,
               typename size_t = std::uint8_t,
               typename coord_size_t = std::int16_t> // TODO: добавить require для типа node_t
-    struct square : private std::vector<node_t>
+    struct square : public base_lattice_t<node_t, square_coords_t<coord_size_t>>
     {
+        using base_t = base_lattice_t<node_t, square_coords_t<coord_size_t>>;
+        using typename base_t::value_t;
+        using typename base_t::coords_t;
         const two_d::sizes_t<size_t> sizes;
         using sizes_t = two_d::sizes_t<size_t>;
-
-        using value_t = node_t;
-        using container_t = std::vector<node_t>;
-        using container_t::begin;
-        using container_t::cbegin;
-        using container_t::cend;
-        using container_t::crbegin;
-        using container_t::crend;
-        using container_t::end;
-        using container_t::rbegin;
-        using container_t::rend;
-        using coords_t = square_coords_t<coord_size_t>;
-
-        constexpr square(const node_t &initial_spin, const size_t &size_x, const size_t &size_y)
-            : container_t{static_cast<container_t::size_type>(size_x * size_y), initial_spin}, sizes{size_x, size_y}
+        
+        constexpr square(const value_t &initial_spin, const size_t &size_x, const size_t &size_y)
+            : base_t{static_cast<typename base_t::size_type>(size_x * size_y), initial_spin}, sizes{size_x, size_y}
         {
             this->shrink_to_fit();
         }
-        constexpr square(const node_t &initial_spin, const sizes_t &sizes_)
+        constexpr square(const value_t &initial_spin, const sizes_t &sizes_)
             : square{initial_spin, sizes_.x, sizes_.y} {}
         // работает когда есть default параметры конструктора node_t
         constexpr explicit square(const sizes_t &sizes_)
-            : square{node_t{}, sizes_.x, sizes_.y} {}
+            : square{value_t{}, sizes_.x, sizes_.y} {}
 
-        std::size_t get_amount_of_nodes() const
-        {
-            return this->size();
-        }
-
-        node_t get(const coords_t &coords) const
+        value_t get(const coords_t &coords) const
         {
             if (coords.x < 0 || coords.x >= sizes.x)
             {
@@ -69,7 +56,7 @@ namespace qss::lattices::two_d
             const auto idx = sizes.x * coords.y + coords.x;
             return this->at(idx);
         }
-        void set(const node_t &value, const coords_t &coords)
+        void set(const value_t &value, const coords_t &coords)
         {
             if (coords.x < 0 || coords.x >= sizes.x)
             {

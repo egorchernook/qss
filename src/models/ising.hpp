@@ -1,7 +1,7 @@
 #ifndef ISING_HPP_INCLUDED
 #define ISING_HPP_INCLUDED
 
-#include "../random.hpp"
+#include "../random/random.hpp"
 #include "../random/mersenne.hpp"
 
 #include <iostream>

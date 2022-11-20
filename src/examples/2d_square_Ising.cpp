@@ -2,13 +2,13 @@
 #include <iostream>
 #include <numeric>
 
-#include "algorithms/Metropolis.hpp"
-#include "models/ising.hpp"
-#include "lattices/2d/square.hpp"
-#include "lattices/2d/2d.hpp"
-#include "lattices/borders_conditions.hpp"
-#include "utility/quantities.hpp"
-#include "utility/functions.hpp"
+#include "../algorithms/Metropolis.hpp"
+#include "../models/ising.hpp"
+#include "../lattices/2d/square.hpp"
+#include "../lattices/2d/2d.hpp"
+#include "../lattices/borders_conditions.hpp"
+#include "../utility/quantities.hpp"
+#include "../utility/functions.hpp"
 
 std::vector<double> get_temperatures(const double T_begin = 1.5,
                                      const double T_end = 4.0,

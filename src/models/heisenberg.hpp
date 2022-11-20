@@ -3,7 +3,7 @@
 
 #include <iostream>
 
-#include "../random.hpp"
+#include "../random/random.hpp"
 #include "../random/mersenne.hpp"
 
 namespace qss::models::heisenberg

@@ -4,6 +4,7 @@
 #include <concepts>
 #include <chrono>
 #include <cmath>
+#include <stdexcept>
 
 namespace qss
 {
@@ -18,21 +19,21 @@ namespace qss
 
     namespace random 
     {
-        int get_seed(const int init = 0, const int top_limiter = 2'004'991) noexcept
+        std::size_t get_seed(const std::size_t init = 0, const std::size_t top_limiter = 2'004'991) noexcept
         {
-            static int counter = 0;
+            static std::size_t counter = 0;
 
             using std::chrono::nanoseconds;
             using clock_type = std::chrono::system_clock;
             using time_type = std::chrono::time_point<clock_type, nanoseconds>;
 
-            const auto time_start = static_cast<time_type>(nanoseconds{init});
+            const auto time_start = time_type{nanoseconds{init}};
             const auto time_end = static_cast<time_type>(clock_type::now());
 
             const auto time_interval =
-                static_cast<int>(std::chrono::duration_cast<nanoseconds>(time_end - time_start).count());
+                static_cast<std::size_t>(std::chrono::duration_cast<nanoseconds>(time_end - time_start).count());
 
-            const auto seed = std::abs(time_interval + counter) % top_limiter;
+            const auto seed = (time_interval + counter) % top_limiter;
 
             counter += init + 1;
 

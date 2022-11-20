@@ -1,7 +1,7 @@
 #ifndef METROPOLIS_HPP_INCLUDED
 #define METROPOLIS_HPP_INCLUDED
 
-#include "../random.hpp"
+#include "../random/random.hpp"
 #include "../random/mersenne.hpp"
 
 #include <type_traits>

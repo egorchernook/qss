@@ -9,8 +9,9 @@
 #include <array>
 
 #include "3d.hpp"
+#include "../base_lattice.hpp"
 #include "../../random/mersenne.hpp"
-#include "../../random.hpp"
+#include "../../random/random.hpp"
 
 namespace qss::lattices::three_d
 {
@@ -37,32 +38,23 @@ namespace qss::lattices::three_d
     template <typename node_t,
               typename size_t = std::uint8_t,
               typename coord_size_t = std::int16_t> // TODO: добавить require для типа node_t
-    struct face_centric_cubic : private std::vector<node_t>
+    struct face_centric_cubic : public base_lattice_t<node_t, fcc_coords_t<coord_size_t>>
     {
+        using base_t = base_lattice_t<node_t, fcc_coords_t<coord_size_t>>;
+        using typename base_t::coords_t;
+        using typename base_t::value_t;
         const three_d::sizes_t<size_t> sizes;
         using sizes_t = three_d::sizes_t<size_t>;
 
         const std::array<sizes_t, 4> sublattices_sizes; // размеры подрешёток
 
-        using value_t = node_t;
-        using container_t = std::vector<node_t>;
-        using container_t::begin;
-        using container_t::cbegin;
-        using container_t::cend;
-        using container_t::crbegin;
-        using container_t::crend;
-        using container_t::end;
-        using container_t::rbegin;
-        using container_t::rend;
-        using coords_t = fcc_coords_t<coord_size_t>;
-
-        constexpr face_centric_cubic(const node_t &initial_spin,
+        constexpr face_centric_cubic(const value_t &initial_spin,
                                      size_t size_x,
                                      size_t size_y,
                                      size_t size_z)
-            : container_t{static_cast<container_t::size_type>(
-                              size_x * size_y * size_z / 2 + (size_x * size_y * size_z) % 2),
-                          initial_spin},
+            : base_t{static_cast<typename base_t::size_type>(
+                         size_x * size_y * size_z / 2 + (size_x * size_y * size_z) % 2),
+                     initial_spin},
               sizes{size_x, size_y, size_z},
               sublattices_sizes{
                   sizes_t{static_cast<size_t>(size_x / 2 + size_x % 2),
@@ -80,18 +72,13 @@ namespace qss::lattices::three_d
         {
             this->shrink_to_fit();
         }
-        constexpr face_centric_cubic(const node_t &initial_spin, const sizes_t &sizes_)
+        constexpr face_centric_cubic(const value_t &initial_spin, const sizes_t &sizes_)
             : face_centric_cubic{initial_spin, sizes_.x, sizes_.y, sizes_.z} {}
         // работает когда есть default параметры конструктора node_t
         constexpr face_centric_cubic(const sizes_t &sizes_)
-            : face_centric_cubic{node_t{}, sizes_.x, sizes_.y, sizes_.z} {}
+            : face_centric_cubic{value_t{}, sizes_.x, sizes_.y, sizes_.z} {}
 
-        std::size_t get_amount_of_nodes() const
-        {
-            return this->size();
-        }
-
-        node_t get(const coords_t &coords) const
+        value_t get(const coords_t &coords) const
         {
             if (coords.w >= 4)
             {
@@ -111,27 +98,28 @@ namespace qss::lattices::three_d
             }
 
             auto get_amount_of_sublattice_nodes = [](const sizes_t &sublattice_size)
+                -> typename base_t::size_type
             {
                 return sublattice_size.x * sublattice_size.y * sublattice_size.z;
             };
-            auto calc_idx = [&coords](const sizes_t &sublattice_size)
+            auto calc_idx = [&coords](const sizes_t &sublattice_size) -> typename base_t::size_type
             {
-                return sublattice_size.x * sublattice_size.y * coords.z + sublattice_size.x * coords.y + coords.x;
+                return static_cast<typename base_t::size_type>(sublattice_size.x * sublattice_size.y * coords.z + sublattice_size.x * coords.y + coords.x);
             };
             const auto shift = [*this, &get_amount_of_sublattice_nodes](const std::uint8_t &w)
             {
-                auto result = 0u;
+                typename base_t::size_type result{};
                 for (auto i = 0u; i < w; ++i)
                 {
                     result += get_amount_of_sublattice_nodes(sublattices_sizes[w]);
                 }
                 return result;
             }(coords.w);
-            const typename container_t::size_type idx = shift + calc_idx(sublattices_sizes[coords.w]);
+            const typename base_t::size_type idx = shift + calc_idx(sublattices_sizes[coords.w]);
             assert(idx <= this->size());
             return this->at(idx);
         }
-        void set(const node_t &value, const coords_t &coords)
+        void set(const value_t &value, const coords_t &coords)
         {
             if (coords.w >= 4)
             {
@@ -151,23 +139,24 @@ namespace qss::lattices::three_d
             }
 
             auto get_amount_of_sublattice_nodes = [](const sizes_t &sublattice_size)
+                -> typename base_t::size_type
             {
                 return sublattice_size.x * sublattice_size.y * sublattice_size.z;
             };
-            auto calc_idx = [&coords](const sizes_t &sublattice_size)
+            auto calc_idx = [&coords](const sizes_t &sublattice_size) -> typename base_t::size_type
             {
-                return sublattice_size.x * sublattice_size.y * coords.z + sublattice_size.x * coords.y + coords.x;
+                return static_cast<typename base_t::size_type>(sublattice_size.x * sublattice_size.y * coords.z + sublattice_size.x * coords.y + coords.x);
             };
             const auto shift = [*this, &get_amount_of_sublattice_nodes](const std::uint8_t &w)
             {
-                auto result = 0u;
+                typename base_t::size_type result{};
                 for (auto i = 0u; i < w; ++i)
                 {
                     result += get_amount_of_sublattice_nodes(sublattices_sizes[w]);
                 }
                 return result;
             }(coords.w);
-            const typename container_t::size_type idx = shift + calc_idx(sublattices_sizes[coords.w]);
+            const typename base_t::size_type idx = shift + calc_idx(sublattices_sizes[coords.w]);
             assert(idx <= this->size());
             this->at(idx) = value;
         }

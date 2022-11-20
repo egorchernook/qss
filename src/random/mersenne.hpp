@@ -16,7 +16,7 @@ namespace qss::random::mersenne
     template <typename genrand_t = std::mt19937> // TODO: добавить ограничение на typename
     class random_t
     {
-        static constexpr const int seed_default = 0;
+        static constexpr const typename genrand_t::result_type seed_default = 0;
         genrand_t m_genrand{};
 
     public:
@@ -25,14 +25,14 @@ namespace qss::random::mersenne
         random_t(const random_t<genrand_t> &) noexcept = default;
         random_t(random_t<genrand_t> &&) noexcept = default;
 
-        random_t(const int seed) noexcept : m_genrand(seed) {}
+        random_t(const typename genrand_t::result_type seed) noexcept : m_genrand(seed) {}
 
         ~random_t() noexcept = default;
 
         random_t<genrand_t> &operator=(const random_t<genrand_t> &) noexcept = default;
         random_t<genrand_t> &operator=(random_t<genrand_t> &&) noexcept = default;
 
-        void cooldown(const int seed) noexcept
+        void cooldown(const typename genrand_t::result_type seed) noexcept
         {
             this->m_genrand
                 .seed(static_cast<typename genrand_t::result_type>(seed));
