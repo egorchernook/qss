@@ -5,6 +5,8 @@
 #include <stdexcept>
 #include <utility>
 #include <algorithm>
+#include <cassert>
+#include <array>
 
 #include "3d.hpp"
 #include "../../random/mersenne.hpp"
@@ -40,8 +42,7 @@ namespace qss::lattices::three_d
         const three_d::sizes_t<size_t> sizes;
         using sizes_t = three_d::sizes_t<size_t>;
 
-        const sizes_t base_sublattice_size; // у базовой подрешётки и подрешётке, смещённой в Oxy, одинаковые размеры
-        // у подрешёток, смещённых в Oyz и Oxz, одинаковые размеры и их легче считать
+        const std::array<sizes_t, 4> sublattices_sizes; // размеры подрешёток
 
         using value_t = node_t;
         using container_t = std::vector<node_t>;
@@ -63,9 +64,19 @@ namespace qss::lattices::three_d
                               size_x * size_y * size_z / 2 + (size_x * size_y * size_z) % 2),
                           initial_spin},
               sizes{size_x, size_y, size_z},
-              base_sublattice_size{static_cast<size_t>(size_x / 2 + size_x % 2),
-                                   static_cast<size_t>(size_y / 2 + size_y % 2),
-                                   static_cast<size_t>(size_z / 2 + size_z % 2)}
+              sublattices_sizes{
+                  sizes_t{static_cast<size_t>(size_x / 2 + size_x % 2),
+                          static_cast<size_t>(size_y / 2 + size_y % 2),
+                          static_cast<size_t>(size_z / 2 + size_z % 2)},
+                  sizes_t{static_cast<size_t>(size_x / 2),
+                          static_cast<size_t>(size_y / 2),
+                          static_cast<size_t>(size_z / 2 + size_z % 2)},
+                  sizes_t{static_cast<size_t>(size_x / 2 + size_x % 2),
+                          static_cast<size_t>(size_y / 2),
+                          static_cast<size_t>(size_z / 2)},
+                  sizes_t{static_cast<size_t>(size_x / 2),
+                          static_cast<size_t>(size_y / 2 + size_y % 2),
+                          static_cast<size_t>(size_z / 2)}}
         {
             this->shrink_to_fit();
         }
@@ -82,122 +93,82 @@ namespace qss::lattices::three_d
 
         node_t get(const coords_t &coords) const
         {
-            switch (coords.w)
+            if (coords.w >= 4)
             {
-            case 0:
-                [[fallthrough]];
-            case 1:
-                if (coords.x < 0 || coords.x >= base_sublattice_size.x)
-                {
-                    throw std::out_of_range("coords.x out of range : " + std::to_string(coords.x));
-                }
-                if (coords.y < 0 || coords.y >= base_sublattice_size.y)
-                {
-                    throw std::out_of_range("coords.y out of range : " + std::to_string(coords.y));
-                }
-                if (coords.z < 0 || coords.z >= base_sublattice_size.z)
-                {
-                    throw std::out_of_range("coords.z out of range : " + std::to_string(coords.z));
-                }
-                break;
-            case 2:
-                [[fallthrough]];
-            case 3:
-                if (coords.x < 0 || coords.x >= sizes.x / 2)
-                {
-                    throw std::out_of_range("coords.x out of range : " + std::to_string(coords.x));
-                }
-                if (coords.y < 0 || coords.y >= sizes.y / 2)
-                {
-                    throw std::out_of_range("coords.y out of range : " + std::to_string(coords.y));
-                }
-                if (coords.z < 0 || coords.z >= sizes.z / 2)
-                {
-                    throw std::out_of_range("coords.z out of range : " + std::to_string(coords.z));
-                }
-                break;
-            default:
                 throw std::out_of_range("coords.w out of range : " + std::to_string(coords.w));
-                break;
             }
-            const auto amount_of_base_lattice_nodes = base_sublattice_size.x * base_sublattice_size.y * base_sublattice_size.z;
-            auto idx = base_sublattice_size.x * base_sublattice_size.y * coords.x + base_sublattice_size.x * coords.y + coords.z;
-            switch (coords.w)
+            if (coords.x < 0 || coords.x >= sublattices_sizes[coords.w].x)
             {
-            case 0:
-                break;
-            case 1:
-                idx += amount_of_base_lattice_nodes;
-                break;
-            case 2:
-                idx += amount_of_base_lattice_nodes * 2;
-                break;
-            case 3:
-                idx += amount_of_base_lattice_nodes * 2 + sizes.x * sizes.y * sizes.z / 8;
-                break;
-            default:
-                break;
+                throw std::out_of_range("coords.x out of range : " + std::to_string(coords.x));
             }
+            if (coords.y < 0 || coords.y >= sublattices_sizes[coords.w].y)
+            {
+                throw std::out_of_range("coords.y out of range : " + std::to_string(coords.y));
+            }
+            if (coords.z < 0 || coords.z >= sublattices_sizes[coords.w].z)
+            {
+                throw std::out_of_range("coords.z out of range : " + std::to_string(coords.z));
+            }
+
+            auto get_amount_of_sublattice_nodes = [](const sizes_t &sublattice_size)
+            {
+                return sublattice_size.x * sublattice_size.y * sublattice_size.z;
+            };
+            auto calc_idx = [&coords](const sizes_t &sublattice_size)
+            {
+                return sublattice_size.x * sublattice_size.y * coords.z + sublattice_size.x * coords.y + coords.x;
+            };
+            const auto shift = [*this, &get_amount_of_sublattice_nodes](const std::uint8_t &w)
+            {
+                auto result = 0u;
+                for (auto i = 0u; i < w; ++i)
+                {
+                    result += get_amount_of_sublattice_nodes(sublattices_sizes[w]);
+                }
+                return result;
+            }(coords.w);
+            const typename container_t::size_type idx = shift + calc_idx(sublattices_sizes[coords.w]);
+            assert(idx <= this->size());
             return this->at(idx);
         }
         void set(const node_t &value, const coords_t &coords)
         {
-            switch (coords.w)
+            if (coords.w >= 4)
             {
-            case 0:
-                [[fallthrough]];
-            case 1:
-                if (coords.x < 0 || coords.x >= base_sublattice_size.x)
-                {
-                    throw std::out_of_range("coords.x out of range : " + std::to_string(coords.x));
-                }
-                if (coords.y < 0 || coords.y >= base_sublattice_size.y)
-                {
-                    throw std::out_of_range("coords.y out of range : " + std::to_string(coords.y));
-                }
-                if (coords.z < 0 || coords.z >= base_sublattice_size.z)
-                {
-                    throw std::out_of_range("coords.z out of range : " + std::to_string(coords.z));
-                }
-                break;
-            case 2:
-                [[fallthrough]];
-            case 3:
-                if (coords.x < 0 || coords.x >= sizes.x / 2)
-                {
-                    throw std::out_of_range("coords.x out of range : " + std::to_string(coords.x));
-                }
-                if (coords.y < 0 || coords.y >= sizes.y / 2)
-                {
-                    throw std::out_of_range("coords.y out of range : " + std::to_string(coords.y));
-                }
-                if (coords.z < 0 || coords.z >= sizes.z / 2)
-                {
-                    throw std::out_of_range("coords.z out of range : " + std::to_string(coords.z));
-                }
-                break;
-            default:
                 throw std::out_of_range("coords.w out of range : " + std::to_string(coords.w));
-                break;
             }
-            const auto amount_of_base_lattice_nodes = base_sublattice_size.x * base_sublattice_size.y * base_sublattice_size.z;
-            auto idx = base_sublattice_size.x * base_sublattice_size.y * coords.x + base_sublattice_size.x * coords.y + coords.z;
-            switch (coords.w)
+            if (coords.x < 0 || coords.x >= sublattices_sizes[coords.w].x)
             {
-            case 0:
-                break;
-            case 1:
-                idx += amount_of_base_lattice_nodes;
-                break;
-            case 2:
-                idx += amount_of_base_lattice_nodes * 2;
-                break;
-            case 3:
-                idx += amount_of_base_lattice_nodes * 2 + sizes.x * sizes.y * sizes.z / 8;
-                break;
-            default:
-                break;
+                throw std::out_of_range("coords.x out of range : " + std::to_string(coords.x));
             }
+            if (coords.y < 0 || coords.y >= sublattices_sizes[coords.w].y)
+            {
+                throw std::out_of_range("coords.y out of range : " + std::to_string(coords.y));
+            }
+            if (coords.z < 0 || coords.z >= sublattices_sizes[coords.w].z)
+            {
+                throw std::out_of_range("coords.z out of range : " + std::to_string(coords.z));
+            }
+
+            auto get_amount_of_sublattice_nodes = [](const sizes_t &sublattice_size)
+            {
+                return sublattice_size.x * sublattice_size.y * sublattice_size.z;
+            };
+            auto calc_idx = [&coords](const sizes_t &sublattice_size)
+            {
+                return sublattice_size.x * sublattice_size.y * coords.z + sublattice_size.x * coords.y + coords.x;
+            };
+            const auto shift = [*this, &get_amount_of_sublattice_nodes](const std::uint8_t &w)
+            {
+                auto result = 0u;
+                for (auto i = 0u; i < w; ++i)
+                {
+                    result += get_amount_of_sublattice_nodes(sublattices_sizes[w]);
+                }
+                return result;
+            }(coords.w);
+            const typename container_t::size_type idx = shift + calc_idx(sublattices_sizes[coords.w]);
+            assert(idx <= this->size());
             this->at(idx) = value;
         }
 
@@ -277,26 +248,9 @@ namespace qss::lattices::three_d
         {
             static auto rand = random_t{qss::random::get_seed()};
             const auto w = static_cast<std::uint8_t>(rand(0, 4));
-            switch (w)
-            {
-            case 0:
-                [[fallthrough]];
-            case 1:
-                return coords_t{w, static_cast<coord_size_t>(rand(0, base_sublattice_size.x)),
-                                static_cast<coord_size_t>(rand(0, base_sublattice_size.y)),
-                                static_cast<coord_size_t>(rand(0, base_sublattice_size.z))};
-                break;
-            case 2:
-                [[fallthrough]];
-            case 3:
-                return coords_t{w, static_cast<coord_size_t>(rand(0, sizes.x / 2)),
-                                static_cast<coord_size_t>(rand(0, sizes.y / 2)),
-                                static_cast<coord_size_t>(rand(0, sizes.z / 2))};
-                break;
-            default:
-                throw std::out_of_range("coords.w out of range : " + std::to_string(w));
-                break;
-            }
+            return coords_t{w, static_cast<coord_size_t>(rand(0, sublattices_sizes[w].x)),
+                            static_cast<coord_size_t>(rand(0, sublattices_sizes[w].y)),
+                            static_cast<coord_size_t>(rand(0, sublattices_sizes[w].z))};
         }
     };
 
