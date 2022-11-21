@@ -53,7 +53,7 @@ namespace qss::lattices::two_d
             {
                 throw std::out_of_range("coords.y out of range : " + std::to_string(coords.y));
             }
-            const auto idx = sizes.x * coords.y + coords.x;
+            const auto idx = static_cast<typename base_t::size_type>(sizes.x * coords.y + coords.x);
             return this->at(idx);
         }
         void set(const value_t &value, const coords_t &coords)
@@ -66,7 +66,7 @@ namespace qss::lattices::two_d
             {
                 throw std::out_of_range("coords.y out of range : " + std::to_string(coords.y));
             }
-            const auto idx = sizes.x * coords.y + coords.x;
+            const auto idx = static_cast<typename base_t::size_type>(sizes.x * coords.y + coords.x);
             this->at(idx) = value;
         }
 

@@ -10,9 +10,9 @@
 #include "../utility/quantities.hpp"
 #include "../utility/functions.hpp"
 
-std::vector<double> get_temperatures(const double T_begin = 0.0,
-                                     const double T_end = 7.0,
-                                     const double delta_T = 0.5)
+std::vector<double> get_temperatures(const double T_begin = 1.0,
+                                     const double T_end = 5.0,
+                                     const double delta_T = 0.25)
 {
     std::vector<double> result{};
     const auto T_amount = static_cast<int>((T_end - T_begin) / delta_T) + 1;
@@ -32,10 +32,10 @@ int main()
     using periodic = qss::border_conditions::periodic<typename lattice_t::coords_t::size_type, typename sizes_t::size_type>;;
     using sharp = qss::border_conditions::sharp<typename lattice_t::coords_t::size_type, typename sizes_t::size_type>;; 
 
-    constexpr static sizes_t sizes{8, 8, 3};
+    constexpr static sizes_t sizes{16, 16, 3};
     lattice_t lattice{spin_t{1.0, 0.0, 0.0}, sizes};
 
-    constexpr static std::uint32_t mcs_amount = 2'000;
+    constexpr static std::uint32_t mcs_amount = 5'000;
     const std::vector temperatures = get_temperatures();
 
     auto delta_energy_f =
