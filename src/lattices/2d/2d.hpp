@@ -6,11 +6,12 @@
 
 namespace qss::lattices::two_d
 {
-    template <typename size_t = std::uint8_t>
+
     struct sizes_t
     {
-        size_t x = 0;
-        size_t y = 0;
+        using size_type = unsigned short;
+        size_type x = 0;
+        size_type y = 0;
     };
 
 }

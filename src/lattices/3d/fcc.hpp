@@ -21,13 +21,13 @@ namespace qss::lattices::three_d
      * {w} = 2 -- смещённая в Oyz решётка
      * {w} = 3 -- смещённая в Oxz решётка
      */
-    template <typename coord_size_t = std::int16_t>
     struct fcc_coords_t
     {
+        using size_type = int;
         std::uint8_t w = 0; // номер простой подрешётки
-        coord_size_t x = 0; //
-        coord_size_t y = 0; // координаты в простой подрешётке
-        coord_size_t z = 0; //
+        size_type x = 0;    //
+        size_type y = 0;    // координаты в простой подрешётке
+        size_type z = 0;    //
     };
 
     /* реализует границентрированную решётку.
@@ -35,40 +35,38 @@ namespace qss::lattices::three_d
      * со смещением относительно друг друга
      * шаблонный параметр {node_t} -- тип хранимого узла (обычно просто спин нужной модели)
      */
-    template <typename node_t,
-              typename size_t = std::uint8_t,
-              typename coord_size_t = std::int16_t> // TODO: добавить require для типа node_t
-    struct face_centric_cubic : public base_lattice_t<node_t, fcc_coords_t<coord_size_t>>
+    template <typename node_t> // TODO: добавить require для типа node_t
+    struct face_centric_cubic : public base_lattice_t<node_t, fcc_coords_t>
     {
-        using base_t = base_lattice_t<node_t, fcc_coords_t<coord_size_t>>;
+        using base_t = base_lattice_t<node_t, fcc_coords_t>;
         using typename base_t::coords_t;
         using typename base_t::value_t;
-        const three_d::sizes_t<size_t> sizes;
-        using sizes_t = three_d::sizes_t<size_t>;
+        const three_d::sizes_t sizes;
+        using sizes_t = three_d::sizes_t;
 
         const std::array<sizes_t, 4> sublattices_sizes; // размеры подрешёток
 
         constexpr face_centric_cubic(const value_t &initial_spin,
-                                     size_t size_x,
-                                     size_t size_y,
-                                     size_t size_z)
+                                     const typename sizes_t::size_type &size_x,
+                                     const typename sizes_t::size_type &size_y,
+                                     const typename sizes_t::size_type &size_z)
             : base_t{static_cast<typename base_t::size_type>(
                          size_x * size_y * size_z / 2 + (size_x * size_y * size_z) % 2),
                      initial_spin},
               sizes{size_x, size_y, size_z},
               sublattices_sizes{
-                  sizes_t{static_cast<size_t>(size_x / 2 + size_x % 2),
-                          static_cast<size_t>(size_y / 2 + size_y % 2),
-                          static_cast<size_t>(size_z / 2 + size_z % 2)},
-                  sizes_t{static_cast<size_t>(size_x / 2),
-                          static_cast<size_t>(size_y / 2),
-                          static_cast<size_t>(size_z / 2 + size_z % 2)},
-                  sizes_t{static_cast<size_t>(size_x / 2 + size_x % 2),
-                          static_cast<size_t>(size_y / 2),
-                          static_cast<size_t>(size_z / 2)},
-                  sizes_t{static_cast<size_t>(size_x / 2),
-                          static_cast<size_t>(size_y / 2 + size_y % 2),
-                          static_cast<size_t>(size_z / 2)}}
+                  sizes_t{static_cast<typename sizes_t::size_type>(size_x / 2 + size_x % 2),
+                          static_cast<typename sizes_t::size_type>(size_y / 2 + size_y % 2),
+                          static_cast<typename sizes_t::size_type>(size_z / 2 + size_z % 2)},
+                  sizes_t{static_cast<typename sizes_t::size_type>(size_x / 2),
+                          static_cast<typename sizes_t::size_type>(size_y / 2),
+                          static_cast<typename sizes_t::size_type>(size_z / 2 + size_z % 2)},
+                  sizes_t{static_cast<typename sizes_t::size_type>(size_x / 2 + size_x % 2),
+                          static_cast<typename sizes_t::size_type>(size_y / 2),
+                          static_cast<typename sizes_t::size_type>(size_z / 2)},
+                  sizes_t{static_cast<typename sizes_t::size_type>(size_x / 2),
+                          static_cast<typename sizes_t::size_type>(size_y / 2 + size_y % 2),
+                          static_cast<typename sizes_t::size_type>(size_z / 2)}}
         {
             this->shrink_to_fit();
         }
@@ -171,59 +169,59 @@ namespace qss::lattices::three_d
             {
             case 0:
                 result.push_back({1, coords.x, coords.y, coords.z});
-                result.push_back({1, coords.x, static_cast<coord_size_t>(coords.y - 1), coords.z});
-                result.push_back({1, static_cast<coord_size_t>(coords.x - 1), coords.y, coords.z});
-                result.push_back({1, static_cast<coord_size_t>(coords.x - 1), static_cast<coord_size_t>(coords.y - 1), coords.z});
+                result.push_back({1, coords.x, coords.y - 1, coords.z});
+                result.push_back({1, coords.x - 1, coords.y, coords.z});
+                result.push_back({1, coords.x - 1, coords.y - 1, coords.z});
                 result.push_back({2, coords.x, coords.y, coords.z});
-                result.push_back({2, coords.x, static_cast<coord_size_t>(coords.y - 1), coords.z});
-                result.push_back({2, coords.x, coords.y, static_cast<coord_size_t>(coords.z - 1)});
-                result.push_back({2, coords.x, static_cast<coord_size_t>(coords.y - 1), static_cast<coord_size_t>(coords.z - 1)});
+                result.push_back({2, coords.x, coords.y - 1, coords.z});
+                result.push_back({2, coords.x, coords.y, coords.z - 1});
+                result.push_back({2, coords.x, coords.y - 1, coords.z - 1});
                 result.push_back({3, coords.x, coords.y, coords.z});
-                result.push_back({3, static_cast<coord_size_t>(coords.x - 1), coords.y, coords.z});
-                result.push_back({3, coords.x, coords.y, static_cast<coord_size_t>(coords.z - 1)});
-                result.push_back({3, static_cast<coord_size_t>(coords.x - 1), coords.y, static_cast<coord_size_t>(coords.z - 1)});
+                result.push_back({3, coords.x - 1, coords.y, coords.z});
+                result.push_back({3, coords.x, coords.y, coords.z - 1});
+                result.push_back({3, coords.x - 1, coords.y, coords.z - 1});
                 break;
             case 1:
                 result.push_back({0, coords.x, coords.y, coords.z});
-                result.push_back({0, static_cast<coord_size_t>(coords.x + 1), coords.y, coords.z});
-                result.push_back({0, coords.x, static_cast<coord_size_t>(coords.y + 1), coords.z});
-                result.push_back({0, static_cast<coord_size_t>(coords.x + 1), static_cast<coord_size_t>(coords.y + 1), coords.z});
+                result.push_back({0, coords.x + 1, coords.y, coords.z});
+                result.push_back({0, coords.x, coords.y + 1, coords.z});
+                result.push_back({0, coords.x + 1, coords.y + 1, coords.z});
                 result.push_back({2, coords.x, coords.y, coords.z});
-                result.push_back({2, static_cast<coord_size_t>(coords.x + 1), coords.y, coords.z});
-                result.push_back({2, coords.x, coords.y, static_cast<coord_size_t>(coords.z - 1)});
-                result.push_back({2, static_cast<coord_size_t>(coords.x + 1), coords.y, static_cast<coord_size_t>(coords.z - 1)});
+                result.push_back({2, coords.x + 1, coords.y, coords.z});
+                result.push_back({2, coords.x, coords.y, coords.z - 1});
+                result.push_back({2, coords.x + 1, coords.y, coords.z - 1});
                 result.push_back({3, coords.x, coords.y, coords.z});
-                result.push_back({3, coords.x, static_cast<coord_size_t>(coords.y + 1), coords.z});
-                result.push_back({3, coords.x, coords.y, static_cast<coord_size_t>(coords.z - 1)});
-                result.push_back({3, coords.x, static_cast<coord_size_t>(coords.y + 1), static_cast<coord_size_t>(coords.z - 1)});
+                result.push_back({3, coords.x, coords.y + 1, coords.z});
+                result.push_back({3, coords.x, coords.y, coords.z - 1});
+                result.push_back({3, coords.x, coords.y + 1, coords.z - 1});
                 break;
             case 2:
                 result.push_back({0, coords.x, coords.y, coords.z});
-                result.push_back({0, coords.x, static_cast<coord_size_t>(coords.y + 1), coords.z});
-                result.push_back({0, coords.x, coords.y, static_cast<coord_size_t>(coords.z + 1)});
-                result.push_back({0, coords.x, static_cast<coord_size_t>(coords.y + 1), static_cast<coord_size_t>(coords.z + 1)});
+                result.push_back({0, coords.x, coords.y + 1, coords.z});
+                result.push_back({0, coords.x, coords.y, coords.z + 1});
+                result.push_back({0, coords.x, coords.y + 1, coords.z + 1});
                 result.push_back({1, coords.x, coords.y, coords.z});
-                result.push_back({1, static_cast<coord_size_t>(coords.x - 1), coords.y, coords.z});
-                result.push_back({1, coords.x, coords.y, static_cast<coord_size_t>(coords.z + 1)});
-                result.push_back({1, static_cast<coord_size_t>(coords.x - 1), coords.y, static_cast<coord_size_t>(coords.z + 1)});
+                result.push_back({1, coords.x - 1, coords.y, coords.z});
+                result.push_back({1, coords.x, coords.y, coords.z + 1});
+                result.push_back({1, coords.x - 1, coords.y, coords.z + 1});
                 result.push_back({3, coords.x, coords.y, coords.z});
-                result.push_back({3, static_cast<coord_size_t>(coords.x - 1), coords.y, coords.z});
-                result.push_back({3, coords.x, static_cast<coord_size_t>(coords.y + 1), coords.z});
-                result.push_back({3, static_cast<coord_size_t>(coords.x - 1), static_cast<coord_size_t>(coords.y + 1), coords.z});
+                result.push_back({3, coords.x - 1, coords.y, coords.z});
+                result.push_back({3, coords.x, coords.y + 1, coords.z});
+                result.push_back({3, coords.x - 1, coords.y + 1, coords.z});
                 break;
             case 3:
                 result.push_back({0, coords.x, coords.y, coords.z});
-                result.push_back({0, static_cast<coord_size_t>(coords.x + 1), coords.y, coords.z});
-                result.push_back({0, coords.x, coords.y, static_cast<coord_size_t>(coords.z + 1)});
-                result.push_back({0, static_cast<coord_size_t>(coords.x + 1), coords.y, static_cast<coord_size_t>(coords.z + 1)});
+                result.push_back({0, coords.x + 1, coords.y, coords.z});
+                result.push_back({0, coords.x, coords.y, coords.z + 1});
+                result.push_back({0, coords.x + 1, coords.y, coords.z + 1});
                 result.push_back({1, coords.x, coords.y, coords.z});
-                result.push_back({1, coords.x, static_cast<coord_size_t>(coords.y - 1), coords.z});
-                result.push_back({1, coords.x, coords.y, static_cast<coord_size_t>(coords.z + 1)});
-                result.push_back({1, coords.x, static_cast<coord_size_t>(coords.y - 1), static_cast<coord_size_t>(coords.z + 1)});
+                result.push_back({1, coords.x, coords.y - 1, coords.z});
+                result.push_back({1, coords.x, coords.y, coords.z + 1});
+                result.push_back({1, coords.x, coords.y - 1, coords.z + 1});
                 result.push_back({2, coords.x, coords.y, coords.z});
-                result.push_back({2, static_cast<coord_size_t>(coords.x + 1), coords.y, coords.z});
-                result.push_back({2, coords.x, static_cast<coord_size_t>(coords.y - 1), coords.z});
-                result.push_back({2, static_cast<coord_size_t>(coords.x + 1), static_cast<coord_size_t>(coords.y - 1), coords.z});
+                result.push_back({2, coords.x + 1, coords.y, coords.z});
+                result.push_back({2, coords.x, coords.y - 1, coords.z});
+                result.push_back({2, coords.x + 1, coords.y - 1, coords.z});
                 break;
             default:
                 throw std::out_of_range("coords.w out of range : " + std::to_string(coords.w));
@@ -235,6 +233,7 @@ namespace qss::lattices::three_d
         template <typename random_t = qss::random::mersenne::random_t<>>
         coords_t choose_random_node() const
         {
+            using coord_size_t = typename coords_t::size_type;
             static auto rand = random_t{qss::random::get_seed()};
             const auto w = static_cast<std::uint8_t>(rand(0, 4));
             return coords_t{w, static_cast<coord_size_t>(rand(0, sublattices_sizes[w].x)),
@@ -243,8 +242,8 @@ namespace qss::lattices::three_d
         }
     };
 
-    template <typename node_t, typename size_t = std::uint8_t>
-    using fcc = face_centric_cubic<node_t, size_t>;
+    template <typename node_t>
+    using fcc = face_centric_cubic<node_t>;
 }
 
 #endif

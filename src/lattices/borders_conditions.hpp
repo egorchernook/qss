@@ -5,43 +5,43 @@
 #include <type_traits>
 #include <iterator>
 #include <optional>
+#include <concepts>
 
 #include "2d/2d.hpp"
 #include "2d/square.hpp"
 #include "3d/3d.hpp"
 #include "3d/fcc.hpp"
 
-namespace qss::lattices
+namespace qss::border_conditions
 {
-    namespace two_d
+    template <typename coord_size_t, typename size_type>
+    struct linear_border_conditions
     {
-        template <typename coord_size_t = std::int16_t>
-        std::optional<square_coords_t<coord_size_t>> use_periodic_conditions(square_coords_t<coord_size_t> coord,
-                                                                             const sizes_t<> &sizes)
+        using coord_size_type = coord_size_t;
+        using sizes_size_type = size_type;
+    };
+    template <typename coord_size_t, typename size_type>
+    struct periodic : linear_border_conditions<coord_size_t, size_type>
+    {
+        std::optional<coord_size_t> operator()(coord_size_t coord, const size_type &size) const
         {
-            if (coord.x >= sizes.x)
+            if (coord >= size)
             {
-                coord.x -= sizes.x;
+                coord -= size;
             }
-            if (coord.y >= sizes.y)
+            if (coord < 0)
             {
-                coord.y -= sizes.y;
-            }
-            if (coord.x < 0)
-            {
-                coord.x += sizes.x;
-            }
-            if (coord.y < 0)
-            {
-                coord.y += sizes.y;
+                coord += size;
             }
             return coord;
         }
-        template <typename coord_size_t = std::int16_t>
-        std::optional<square_coords_t<coord_size_t>> use_sharp_conditions(square_coords_t<coord_size_t> coord,
-                                                                          const sizes_t<> &sizes)
+    };
+    template <typename coord_size_t, typename size_type>
+    struct sharp : linear_border_conditions<coord_size_t, size_type>
+    {
+        std::optional<coord_size_t> operator()(coord_size_t coord, const size_type &size) const
         {
-            if (coord.x >= sizes.x || coord.x < 0 || coord.y >= sizes.y || coord.y < 0)
+            if (coord < 0 || coord >= size)
             {
                 return {};
             }
@@ -49,112 +49,93 @@ namespace qss::lattices
             {
                 return coord;
             }
+        }
+    };
+
+    template <typename x_conds_t, typename y_conds_t>
+    requires std::is_same_v<typename x_conds_t::coord_size_type,
+                            typename y_conds_t::coord_size_type> &&
+        std::is_same_v<typename x_conds_t::sizes_size_type,
+                       typename y_conds_t::sizes_size_type>
+    auto use_border_conditions(const typename qss::lattices::two_d::square_coords_t &coord,
+                               const typename qss::lattices::two_d::sizes_t &sizes)
+        -> std::optional<typename qss::lattices::two_d::square_coords_t>
+    {
+        using coords_t_size_type = typename qss::lattices::two_d::square_coords_t::size_type;
+        static const x_conds_t x_conds{};
+        static const y_conds_t y_conds{};
+        const auto x = x_conds(coord.x, sizes.x);
+        const auto y = y_conds(coord.y, sizes.y);
+        if (!x.has_value() || !y.has_value())
+        {
+            return {};
+        }
+        else
+        {
+            return typename qss::lattices::two_d::square_coords_t{static_cast<coords_t_size_type>(x.value()),
+                                                                  static_cast<coords_t_size_type>(y.value())};
         }
     }
 
-    namespace three_d
+    template <typename x_conds_t, typename y_conds_t, typename z_conds_t>
+    requires std::is_same_v<typename x_conds_t::coord_size_type,
+                            typename y_conds_t::coord_size_type> &&
+        std::is_same_v<typename y_conds_t::coord_size_type,
+                       typename z_conds_t::coord_size_type> &&
+        std::is_same_v<typename x_conds_t::sizes_size_type,
+                       typename y_conds_t::sizes_size_type> &&
+        std::is_same_v<typename y_conds_t::sizes_size_type,
+                       typename z_conds_t::sizes_size_type>
+    auto use_border_conditions(const typename qss::lattices::three_d::fcc_coords_t &coord,
+                               const typename qss::lattices::three_d::sizes_t &sizes)
+        -> std::optional<typename qss::lattices::three_d::fcc_coords_t>
     {
-        template <typename coord_size_t = std::int16_t>
-        std::optional<fcc_coords_t<coord_size_t>> use_periodic_conditions(fcc_coords_t<coord_size_t> coord,
-                                                                          const sizes_t<> &sizes)
+        using coords_t_size_type = typename qss::lattices::three_d::fcc_coords_t::size_type;
+        using size_type = typename x_conds_t::sizes_size_type;
+        typename qss::lattices::three_d::sizes_t sublattice_size{};
+        switch (coord.w)
         {
-            sizes_t<coord_size_t> sublattice_size{};
-            switch (coord.w)
-            {
-            case 0:
-                sublattice_size = {static_cast<coord_size_t>(sizes.x / 2 + sizes.x % 2),
-                                   static_cast<coord_size_t>(sizes.y / 2 + sizes.y % 2),
-                                   static_cast<coord_size_t>(sizes.z / 2 + sizes.z % 2)};
-                break;
-            case 1:
-                sublattice_size = {static_cast<coord_size_t>(sizes.x / 2),
-                                   static_cast<coord_size_t>(sizes.y / 2),
-                                   static_cast<coord_size_t>(sizes.z / 2 + sizes.z % 2)};
-                break;
-            case 2:
-                sublattice_size = {static_cast<coord_size_t>(sizes.x / 2 + sizes.x % 2),
-                                   static_cast<coord_size_t>(sizes.y / 2),
-                                   static_cast<coord_size_t>(sizes.z / 2)};
-                break;
-            case 3:
-                sublattice_size = {static_cast<coord_size_t>(sizes.x / 2),
-                                   static_cast<coord_size_t>(sizes.y / 2 + sizes.y % 2),
-                                   static_cast<coord_size_t>(sizes.z / 2)};
-                break;
-            default:
-                throw std::out_of_range("coord.w out of range : " + std::to_string(coord.w));
-                break;
-            }
-
-            if (coord.x >= sublattice_size.x)
-            {
-                coord.x -= sublattice_size.x;
-            }
-            if (coord.y >= sublattice_size.y)
-            {
-                coord.y -= sublattice_size.y;
-            }
-            if (coord.z >= sublattice_size.z)
-            {
-                coord.z -= sublattice_size.z;
-            }
-            if (coord.x < 0)
-            {
-                coord.x += sublattice_size.x;
-            }
-            if (coord.y < 0)
-            {
-                coord.y += sublattice_size.y;
-            }
-            if (coord.z < 0)
-            {
-                coord.z += sublattice_size.z;
-            }
-            return coord;
+        case 0:
+            sublattice_size = {static_cast<size_type>(sizes.x / 2 + sizes.x % 2),
+                               static_cast<size_type>(sizes.y / 2 + sizes.y % 2),
+                               static_cast<size_type>(sizes.z / 2 + sizes.z % 2)};
+            break;
+        case 1:
+            sublattice_size = {static_cast<size_type>(sizes.x / 2),
+                               static_cast<size_type>(sizes.y / 2),
+                               static_cast<size_type>(sizes.z / 2 + sizes.z % 2)};
+            break;
+        case 2:
+            sublattice_size = {static_cast<size_type>(sizes.x / 2 + sizes.x % 2),
+                               static_cast<size_type>(sizes.y / 2),
+                               static_cast<size_type>(sizes.z / 2)};
+            break;
+        case 3:
+            sublattice_size = {static_cast<size_type>(sizes.x / 2),
+                               static_cast<size_type>(sizes.y / 2 + sizes.y % 2),
+                               static_cast<size_type>(sizes.z / 2)};
+            break;
+        default:
+            throw std::out_of_range("coord.w out of range : " + std::to_string(coord.w));
+            break;
         }
-        template <typename coord_size_t = std::int16_t>
-        std::optional<fcc_coords_t<coord_size_t>> use_sharp_conditions(fcc_coords_t<coord_size_t> coord,
-                                                                       const sizes_t<> &sizes)
-        {
-            sizes_t<coord_size_t> sublattice_size{};
-            switch (coord.w)
-            {
-            case 0:
-                sublattice_size = {static_cast<coord_size_t>(sizes.x / 2 + sizes.x % 2),
-                                   static_cast<coord_size_t>(sizes.y / 2 + sizes.y % 2),
-                                   static_cast<coord_size_t>(sizes.z / 2 + sizes.z % 2)};
-                break;
-            case 1:
-                sublattice_size = {static_cast<coord_size_t>(sizes.x / 2),
-                                   static_cast<coord_size_t>(sizes.y / 2),
-                                   static_cast<coord_size_t>(sizes.z / 2 + sizes.z % 2)};
-                break;
-            case 2:
-                sublattice_size = {static_cast<coord_size_t>(sizes.x / 2 + sizes.x % 2),
-                                   static_cast<coord_size_t>(sizes.y / 2),
-                                   static_cast<coord_size_t>(sizes.z / 2)};
-                break;
-            case 3:
-                sublattice_size = {static_cast<coord_size_t>(sizes.x / 2),
-                                   static_cast<coord_size_t>(sizes.y / 2 + sizes.y % 2),
-                                   static_cast<coord_size_t>(sizes.z / 2)};
-                break;
-            default:
-                throw std::out_of_range("coord.w out of range : " + std::to_string(coord.w));
-                break;
-            }
 
-            bool x_out_of_range = coord.x >= sublattice_size || coord.x < 0;
-            bool y_out_of_range = coord.y >= sublattice_size || coord.y < 0;
-            bool z_out_of_range = coord.z >= sublattice_size || coord.z < 0;
-            if (x_out_of_range || y_out_of_range || z_out_of_range)
-            {
-                return {};
-            }
-            else
-            {
-                return coord;
-            }
+        static const x_conds_t x_conds{};
+        static const y_conds_t y_conds{};
+        static const z_conds_t z_conds{};
+        const auto x = x_conds(coord.x, sublattice_size.x);
+        const auto y = y_conds(coord.y, sublattice_size.y);
+        const auto z = z_conds(coord.z, sublattice_size.z);
+        if (!x.has_value() || !y.has_value() || !z.has_value())
+        {
+            return {};
+        }
+        else
+        {
+            return typename qss::lattices::three_d::fcc_coords_t{static_cast<std::uint8_t>(coord.w),
+                                                                 static_cast<coords_t_size_type>(x.value()),
+                                                                 static_cast<coords_t_size_type>(y.value()),
+                                                                 static_cast<coords_t_size_type>(z.value())};
         }
     }
 }

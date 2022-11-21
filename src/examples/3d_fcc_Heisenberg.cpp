@@ -28,7 +28,9 @@ int main()
     using spin_t = qss::models::heisenberg::spin;
     using magn_t = qss::models::heisenberg::magn;
     using lattice_t = qss::lattices::three_d::fcc<spin_t>;
-    using sizes_t = qss::lattices::three_d::sizes_t<>;
+    using sizes_t = qss::lattices::three_d::sizes_t;
+    using periodic = qss::border_conditions::periodic<typename lattice_t::coords_t::size_type, typename sizes_t::size_type>;;
+    using sharp = qss::border_conditions::sharp<typename lattice_t::coords_t::size_type, typename sizes_t::size_type>;; 
 
     constexpr static sizes_t sizes{8, 8, 3};
     lattice_t lattice{spin_t{1.0, 0.0, 0.0}, sizes};
@@ -46,7 +48,7 @@ int main()
             qss::get_sum_of_closest_neighbours<magn_t>(
                 lattice_,
                 central,
-                qss::lattices::three_d::use_periodic_conditions<>);
+                qss::border_conditions::use_border_conditions<periodic, periodic, sharp>);
 
         return scalar_multiply(sum ,(lattice_.get(central) - new_spin));
     };
