@@ -11,7 +11,7 @@ examples:
 	g++-10 ${STANDART} ${OPTIMIZATION} ${WARNING_LVL} ${SOURCE_DIR}/3d_fcc_Heisenberg.cpp -o ${BUILD_DIR}/gcc/3d_fcc_Heisenberg.execute
 	g++-10 ${STANDART} ${OPTIMIZATION} ${WARNING_LVL} ${SOURCE_DIR}/2d_square_Ising.cpp -o ${BUILD_DIR}/gcc/2d_square_Ising.execute
 
-	# clang -lstdc++ -lm ${STANDART} ${OPTIMIZATION} ${WARNING_LVL} ${SOURCE_DIR}/3d_fcc_Heisenberg.cpp -o ${BUILD_DIR}/clang/3d_fcc_Heisenberg.execute
+	# clang ${STANDART} ${OPTIMIZATION} ${WARNING_LVL} ${SOURCE_DIR}/3d_fcc_Heisenberg.cpp -o ${BUILD_DIR}/clang/3d_fcc_Heisenberg.execute
 	# clang ${STANDART} ${OPTIMIZATION} ${WARNING_LVL} ${SOURCE_DIR}/2d_square_Ising.cpp -o ${BUILD_DIR}/clang/2d_square_Ising.execute
 
 clean:
