@@ -6,7 +6,6 @@
 #include <utility>
 #include <algorithm>
 #include <cassert>
-#include <array>
 
 #include "3d.hpp"
 #include "../base_lattice.hpp"
@@ -30,6 +29,74 @@ namespace qss::lattices::three_d
         size_type z = 0;    //
     };
 
+    std::vector<fcc_coords_t> get_closest_neighbours(const fcc_coords_t &coords)
+    {
+        std::vector<fcc_coords_t> result{};
+        switch (coords.w)
+        {
+        case 0:
+            result.push_back({1, coords.x, coords.y, coords.z});
+            result.push_back({1, coords.x, coords.y - 1, coords.z});
+            result.push_back({1, coords.x - 1, coords.y, coords.z});
+            result.push_back({1, coords.x - 1, coords.y - 1, coords.z});
+            result.push_back({2, coords.x, coords.y, coords.z});
+            result.push_back({2, coords.x, coords.y - 1, coords.z});
+            result.push_back({2, coords.x, coords.y, coords.z - 1});
+            result.push_back({2, coords.x, coords.y - 1, coords.z - 1});
+            result.push_back({3, coords.x, coords.y, coords.z});
+            result.push_back({3, coords.x - 1, coords.y, coords.z});
+            result.push_back({3, coords.x, coords.y, coords.z - 1});
+            result.push_back({3, coords.x - 1, coords.y, coords.z - 1});
+            break;
+        case 1:
+            result.push_back({0, coords.x, coords.y, coords.z});
+            result.push_back({0, coords.x + 1, coords.y, coords.z});
+            result.push_back({0, coords.x, coords.y + 1, coords.z});
+            result.push_back({0, coords.x + 1, coords.y + 1, coords.z});
+            result.push_back({2, coords.x, coords.y, coords.z});
+            result.push_back({2, coords.x + 1, coords.y, coords.z});
+            result.push_back({2, coords.x, coords.y, coords.z - 1});
+            result.push_back({2, coords.x + 1, coords.y, coords.z - 1});
+            result.push_back({3, coords.x, coords.y, coords.z});
+            result.push_back({3, coords.x, coords.y + 1, coords.z});
+            result.push_back({3, coords.x, coords.y, coords.z - 1});
+            result.push_back({3, coords.x, coords.y + 1, coords.z - 1});
+            break;
+        case 2:
+            result.push_back({0, coords.x, coords.y, coords.z});
+            result.push_back({0, coords.x, coords.y + 1, coords.z});
+            result.push_back({0, coords.x, coords.y, coords.z + 1});
+            result.push_back({0, coords.x, coords.y + 1, coords.z + 1});
+            result.push_back({1, coords.x, coords.y, coords.z});
+            result.push_back({1, coords.x - 1, coords.y, coords.z});
+            result.push_back({1, coords.x, coords.y, coords.z + 1});
+            result.push_back({1, coords.x - 1, coords.y, coords.z + 1});
+            result.push_back({3, coords.x, coords.y, coords.z});
+            result.push_back({3, coords.x - 1, coords.y, coords.z});
+            result.push_back({3, coords.x, coords.y + 1, coords.z});
+            result.push_back({3, coords.x - 1, coords.y + 1, coords.z});
+            break;
+        case 3:
+            result.push_back({0, coords.x, coords.y, coords.z});
+            result.push_back({0, coords.x + 1, coords.y, coords.z});
+            result.push_back({0, coords.x, coords.y, coords.z + 1});
+            result.push_back({0, coords.x + 1, coords.y, coords.z + 1});
+            result.push_back({1, coords.x, coords.y, coords.z});
+            result.push_back({1, coords.x, coords.y - 1, coords.z});
+            result.push_back({1, coords.x, coords.y, coords.z + 1});
+            result.push_back({1, coords.x, coords.y - 1, coords.z + 1});
+            result.push_back({2, coords.x, coords.y, coords.z});
+            result.push_back({2, coords.x + 1, coords.y, coords.z});
+            result.push_back({2, coords.x, coords.y - 1, coords.z});
+            result.push_back({2, coords.x + 1, coords.y - 1, coords.z});
+            break;
+        default:
+            throw std::out_of_range("coords.w out of range : " + std::to_string(coords.w));
+            break;
+        }
+        return result;
+    }
+
     /* реализует границентрированную решётку.
      * её можно представить как 4 простые кубические
      * со смещением относительно друг друга
@@ -44,6 +111,28 @@ namespace qss::lattices::three_d
         const three_d::sizes_t sizes;
         using sizes_t = three_d::sizes_t;
 
+    private:
+        void bounds_check(const coords_t &coords) const
+        {
+            if (coords.w >= 4)
+            {
+                throw std::out_of_range("coords.w out of range : " + std::to_string(coords.w));
+            }
+            if (coords.x < 0 || coords.x >= sublattices_sizes[coords.w].x)
+            {
+                throw std::out_of_range("coords.x out of range : " + std::to_string(coords.x));
+            }
+            if (coords.y < 0 || coords.y >= sublattices_sizes[coords.w].y)
+            {
+                throw std::out_of_range("coords.y out of range : " + std::to_string(coords.y));
+            }
+            if (coords.z < 0 || coords.z >= sublattices_sizes[coords.w].z)
+            {
+                throw std::out_of_range("coords.z out of range : " + std::to_string(coords.z));
+            }
+        };
+
+    public:
         const std::array<sizes_t, 4> sublattices_sizes; // размеры подрешёток
 
         constexpr face_centric_cubic(const value_t &initial_spin,
@@ -78,23 +167,7 @@ namespace qss::lattices::three_d
 
         value_t get(const coords_t &coords) const
         {
-            if (coords.w >= 4)
-            {
-                throw std::out_of_range("coords.w out of range : " + std::to_string(coords.w));
-            }
-            if (coords.x < 0 || coords.x >= sublattices_sizes[coords.w].x)
-            {
-                throw std::out_of_range("coords.x out of range : " + std::to_string(coords.x));
-            }
-            if (coords.y < 0 || coords.y >= sublattices_sizes[coords.w].y)
-            {
-                throw std::out_of_range("coords.y out of range : " + std::to_string(coords.y));
-            }
-            if (coords.z < 0 || coords.z >= sublattices_sizes[coords.w].z)
-            {
-                throw std::out_of_range("coords.z out of range : " + std::to_string(coords.z));
-            }
-
+            bounds_check(coords);
             auto get_amount_of_sublattice_nodes = [](const sizes_t &sublattice_size)
                 -> typename base_t::size_type
             {
@@ -119,23 +192,7 @@ namespace qss::lattices::three_d
         }
         void set(const value_t &value, const coords_t &coords)
         {
-            if (coords.w >= 4)
-            {
-                throw std::out_of_range("coords.w out of range : " + std::to_string(coords.w));
-            }
-            if (coords.x < 0 || coords.x >= sublattices_sizes[coords.w].x)
-            {
-                throw std::out_of_range("coords.x out of range : " + std::to_string(coords.x));
-            }
-            if (coords.y < 0 || coords.y >= sublattices_sizes[coords.w].y)
-            {
-                throw std::out_of_range("coords.y out of range : " + std::to_string(coords.y));
-            }
-            if (coords.z < 0 || coords.z >= sublattices_sizes[coords.w].z)
-            {
-                throw std::out_of_range("coords.z out of range : " + std::to_string(coords.z));
-            }
-
+            bounds_check(coords);
             auto get_amount_of_sublattice_nodes = [](const sizes_t &sublattice_size)
                 -> typename base_t::size_type
             {
@@ -157,77 +214,6 @@ namespace qss::lattices::three_d
             const typename base_t::size_type idx = shift + calc_idx(sublattices_sizes[coords.w]);
             assert(idx <= this->size());
             this->at(idx) = value;
-        }
-
-        /* возвращает массив соседних вершин с координатами
-         * для получения суммы учитываете ваши граничные условия
-         */
-        std::vector<coords_t> get_closest_neighbours(const coords_t &coords) const
-        {
-            std::vector<coords_t> result{};
-            switch (coords.w)
-            {
-            case 0:
-                result.push_back({1, coords.x, coords.y, coords.z});
-                result.push_back({1, coords.x, coords.y - 1, coords.z});
-                result.push_back({1, coords.x - 1, coords.y, coords.z});
-                result.push_back({1, coords.x - 1, coords.y - 1, coords.z});
-                result.push_back({2, coords.x, coords.y, coords.z});
-                result.push_back({2, coords.x, coords.y - 1, coords.z});
-                result.push_back({2, coords.x, coords.y, coords.z - 1});
-                result.push_back({2, coords.x, coords.y - 1, coords.z - 1});
-                result.push_back({3, coords.x, coords.y, coords.z});
-                result.push_back({3, coords.x - 1, coords.y, coords.z});
-                result.push_back({3, coords.x, coords.y, coords.z - 1});
-                result.push_back({3, coords.x - 1, coords.y, coords.z - 1});
-                break;
-            case 1:
-                result.push_back({0, coords.x, coords.y, coords.z});
-                result.push_back({0, coords.x + 1, coords.y, coords.z});
-                result.push_back({0, coords.x, coords.y + 1, coords.z});
-                result.push_back({0, coords.x + 1, coords.y + 1, coords.z});
-                result.push_back({2, coords.x, coords.y, coords.z});
-                result.push_back({2, coords.x + 1, coords.y, coords.z});
-                result.push_back({2, coords.x, coords.y, coords.z - 1});
-                result.push_back({2, coords.x + 1, coords.y, coords.z - 1});
-                result.push_back({3, coords.x, coords.y, coords.z});
-                result.push_back({3, coords.x, coords.y + 1, coords.z});
-                result.push_back({3, coords.x, coords.y, coords.z - 1});
-                result.push_back({3, coords.x, coords.y + 1, coords.z - 1});
-                break;
-            case 2:
-                result.push_back({0, coords.x, coords.y, coords.z});
-                result.push_back({0, coords.x, coords.y + 1, coords.z});
-                result.push_back({0, coords.x, coords.y, coords.z + 1});
-                result.push_back({0, coords.x, coords.y + 1, coords.z + 1});
-                result.push_back({1, coords.x, coords.y, coords.z});
-                result.push_back({1, coords.x - 1, coords.y, coords.z});
-                result.push_back({1, coords.x, coords.y, coords.z + 1});
-                result.push_back({1, coords.x - 1, coords.y, coords.z + 1});
-                result.push_back({3, coords.x, coords.y, coords.z});
-                result.push_back({3, coords.x - 1, coords.y, coords.z});
-                result.push_back({3, coords.x, coords.y + 1, coords.z});
-                result.push_back({3, coords.x - 1, coords.y + 1, coords.z});
-                break;
-            case 3:
-                result.push_back({0, coords.x, coords.y, coords.z});
-                result.push_back({0, coords.x + 1, coords.y, coords.z});
-                result.push_back({0, coords.x, coords.y, coords.z + 1});
-                result.push_back({0, coords.x + 1, coords.y, coords.z + 1});
-                result.push_back({1, coords.x, coords.y, coords.z});
-                result.push_back({1, coords.x, coords.y - 1, coords.z});
-                result.push_back({1, coords.x, coords.y, coords.z + 1});
-                result.push_back({1, coords.x, coords.y - 1, coords.z + 1});
-                result.push_back({2, coords.x, coords.y, coords.z});
-                result.push_back({2, coords.x + 1, coords.y, coords.z});
-                result.push_back({2, coords.x, coords.y - 1, coords.z});
-                result.push_back({2, coords.x + 1, coords.y - 1, coords.z});
-                break;
-            default:
-                throw std::out_of_range("coords.w out of range : " + std::to_string(coords.w));
-                break;
-            }
-            return result;
         }
 
         template <typename random_t = qss::random::mersenne::random_t<>>

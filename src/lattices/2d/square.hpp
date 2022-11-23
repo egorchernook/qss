@@ -5,7 +5,6 @@
 #include <utility>
 #include <algorithm>
 #include <stdexcept>
-#include <optional>
 
 #include "2d.hpp"
 #include "../base_lattice.hpp"
@@ -21,6 +20,16 @@ namespace qss::lattices::two_d
         size_type y = 0;
     };
 
+    std::vector<square_coords_t> get_closest_neighbours(const square_coords_t &coords)
+    {
+        std::vector<square_coords_t> result{};
+        result.push_back({coords.x - 1, coords.y});
+        result.push_back({coords.x, coords.y - 1});
+        result.push_back({coords.x + 1, coords.y});
+        result.push_back({coords.x, coords.y + 1});
+        return result;
+    }
+
     template <typename node_t> // TODO: добавить require для типа node_t
     struct square : public base_lattice_t<node_t, square_coords_t>
     {
@@ -30,6 +39,20 @@ namespace qss::lattices::two_d
         const two_d::sizes_t sizes;
         using sizes_t = two_d::sizes_t;
 
+    private:
+        void bounds_check(const coords_t &coords) const
+        {
+            if (coords.x < 0 || coords.x >= sizes.x)
+            {
+                throw std::out_of_range("coords.x out of range : " + std::to_string(coords.x));
+            }
+            if (coords.y < 0 || coords.y >= sizes.y)
+            {
+                throw std::out_of_range("coords.y out of range : " + std::to_string(coords.y));
+            }
+        }
+
+    public:
         constexpr square(const value_t &initial_spin,
                          const typename sizes_t::size_type &size_x,
                          const typename sizes_t::size_type &size_y)
@@ -45,37 +68,15 @@ namespace qss::lattices::two_d
 
         value_t get(const coords_t &coords) const
         {
-            if (coords.x < 0 || coords.x >= sizes.x)
-            {
-                throw std::out_of_range("coords.x out of range : " + std::to_string(coords.x));
-            }
-            if (coords.y < 0 || coords.y >= sizes.y)
-            {
-                throw std::out_of_range("coords.y out of range : " + std::to_string(coords.y));
-            }
+            bounds_check(coords);
             const auto idx = static_cast<typename base_t::size_type>(sizes.x * coords.y + coords.x);
             return this->at(idx);
         }
         void set(const value_t &value, const coords_t &coords)
         {
-            if (coords.x < 0 || coords.x >= sizes.x)
-            {
-                throw std::out_of_range("coords.x out of range : " + std::to_string(coords.x));
-            }
-            if (coords.y < 0 || coords.y >= sizes.y)
-            {
-                throw std::out_of_range("coords.y out of range : " + std::to_string(coords.y));
-            }
+            bounds_check(coords);
             const auto idx = static_cast<typename base_t::size_type>(sizes.x * coords.y + coords.x);
             this->at(idx) = value;
-        }
-
-        std::vector<coords_t> get_closest_neighbours(const coords_t &coords) const
-        {
-            return {coords_t{coords.x - 1, coords.y},
-                    coords_t{coords.x, coords.y - 1},
-                    coords_t{coords.x + 1, coords.y},
-                    coords_t{coords.x, coords.y + 1}};
         }
 
         template <typename random_t = qss::random::mersenne::random_t<>>

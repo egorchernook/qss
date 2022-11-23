@@ -10,15 +10,15 @@ namespace qss::lattices
     struct base_lattice_t : protected std::vector<node_t>
     {
         using container_t = std::vector<node_t>;
-        using container_t::container_t;
         using container_t::begin;
         using container_t::cbegin;
-        using container_t::rbegin;
-        using container_t::crbegin;
-        using container_t::end;
         using container_t::cend;
-        using container_t::rend;
+        using container_t::container_t;
+        using container_t::crbegin;
         using container_t::crend;
+        using container_t::end;
+        using container_t::rbegin;
+        using container_t::rend;
 
         using value_t = node_t;
         using coords_t = coordinates_t;
@@ -27,10 +27,12 @@ namespace qss::lattices
             return this->size();
         }
 
-        virtual ~base_lattice_t() {};
+        virtual ~base_lattice_t() noexcept {};
         virtual value_t get(const coords_t &coord) const = 0;
         virtual void set(const node_t &value, const coords_t &coords) = 0;
-        virtual std::vector<coords_t> get_closest_neighbours(const coords_t &coords) const = 0;
+
+    protected:
+        virtual void bounds_check(const coords_t &coords) const = 0;
     };
 
     template <typename T>

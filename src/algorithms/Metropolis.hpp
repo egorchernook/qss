@@ -19,7 +19,7 @@ namespace qss::algorithms::metropolis
                    const double &temperature)
     {
         static random_t rand{qss::random::get_seed()};
-        for (auto _ = 0u; _ < lattice.get_amount_of_nodes(); ++_)
+        for (auto _ = 0llu; _ < lattice.get_amount_of_nodes(); ++_)
         {
             const auto old_spin_coords = lattice.template choose_random_node<random_t>();
             const auto spin_new = lattice_t::value_t::template generate<random_t>();

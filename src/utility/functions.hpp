@@ -18,7 +18,7 @@ namespace qss
                                          const typename lattice_t::coords_t &central,
                                          borders_conditions_t borders_conditions)
     {
-        auto neigs = lattice.get_closest_neighbours(central);
+        auto neigs = get_closest_neighbours(central);
         const auto sizes = lattice.sizes;
         
         magn_t sum{};
@@ -47,7 +47,7 @@ namespace qss
         if( std::abs(J - 1.0) < std::numeric_limits<double>::epsilon() * 100) {
             return get_sum_of_closest_neighbours(lattice, central, borders_conditions);
         }
-        auto neigs = lattice.get_closest_neighbours(central);
+        auto neigs = get_closest_neighbours(central);
         const auto sizes = lattice.sizes;
         
         magn_t sum{};
