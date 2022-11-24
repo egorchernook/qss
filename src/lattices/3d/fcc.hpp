@@ -35,60 +35,64 @@ namespace qss::lattices::three_d
         switch (coords.w)
         {
         case 0:
-            result.push_back({1, coords.x, coords.y, coords.z});
-            result.push_back({1, coords.x, coords.y - 1, coords.z});
-            result.push_back({1, coords.x - 1, coords.y, coords.z});
-            result.push_back({1, coords.x - 1, coords.y - 1, coords.z});
-            result.push_back({2, coords.x, coords.y, coords.z});
-            result.push_back({2, coords.x, coords.y - 1, coords.z});
-            result.push_back({2, coords.x, coords.y, coords.z - 1});
-            result.push_back({2, coords.x, coords.y - 1, coords.z - 1});
-            result.push_back({3, coords.x, coords.y, coords.z});
-            result.push_back({3, coords.x - 1, coords.y, coords.z});
-            result.push_back({3, coords.x, coords.y, coords.z - 1});
-            result.push_back({3, coords.x - 1, coords.y, coords.z - 1});
+            return {
+                {1, coords.x, coords.y, coords.z},
+                {1, coords.x, coords.y - 1, coords.z},
+                {1, coords.x - 1, coords.y, coords.z},
+                {1, coords.x - 1, coords.y - 1, coords.z},
+                {2, coords.x, coords.y, coords.z},
+                {2, coords.x, coords.y - 1, coords.z},
+                {2, coords.x, coords.y, coords.z - 1},
+                {2, coords.x, coords.y - 1, coords.z - 1},
+                {3, coords.x, coords.y, coords.z},
+                {3, coords.x - 1, coords.y, coords.z},
+                {3, coords.x, coords.y, coords.z - 1},
+                {3, coords.x - 1, coords.y, coords.z - 1}};
             break;
         case 1:
-            result.push_back({0, coords.x, coords.y, coords.z});
-            result.push_back({0, coords.x + 1, coords.y, coords.z});
-            result.push_back({0, coords.x, coords.y + 1, coords.z});
-            result.push_back({0, coords.x + 1, coords.y + 1, coords.z});
-            result.push_back({2, coords.x, coords.y, coords.z});
-            result.push_back({2, coords.x + 1, coords.y, coords.z});
-            result.push_back({2, coords.x, coords.y, coords.z - 1});
-            result.push_back({2, coords.x + 1, coords.y, coords.z - 1});
-            result.push_back({3, coords.x, coords.y, coords.z});
-            result.push_back({3, coords.x, coords.y + 1, coords.z});
-            result.push_back({3, coords.x, coords.y, coords.z - 1});
-            result.push_back({3, coords.x, coords.y + 1, coords.z - 1});
+            return {
+                {0, coords.x, coords.y, coords.z},
+                {0, coords.x + 1, coords.y, coords.z},
+                {0, coords.x, coords.y + 1, coords.z},
+                {0, coords.x + 1, coords.y + 1, coords.z},
+                {2, coords.x, coords.y, coords.z},
+                {2, coords.x + 1, coords.y, coords.z},
+                {2, coords.x, coords.y, coords.z - 1},
+                {2, coords.x + 1, coords.y, coords.z - 1},
+                {3, coords.x, coords.y, coords.z},
+                {3, coords.x, coords.y + 1, coords.z},
+                {3, coords.x, coords.y, coords.z - 1},
+                {3, coords.x, coords.y + 1, coords.z - 1}};
             break;
         case 2:
-            result.push_back({0, coords.x, coords.y, coords.z});
-            result.push_back({0, coords.x, coords.y + 1, coords.z});
-            result.push_back({0, coords.x, coords.y, coords.z + 1});
-            result.push_back({0, coords.x, coords.y + 1, coords.z + 1});
-            result.push_back({1, coords.x, coords.y, coords.z});
-            result.push_back({1, coords.x - 1, coords.y, coords.z});
-            result.push_back({1, coords.x, coords.y, coords.z + 1});
-            result.push_back({1, coords.x - 1, coords.y, coords.z + 1});
-            result.push_back({3, coords.x, coords.y, coords.z});
-            result.push_back({3, coords.x - 1, coords.y, coords.z});
-            result.push_back({3, coords.x, coords.y + 1, coords.z});
-            result.push_back({3, coords.x - 1, coords.y + 1, coords.z});
+            return {
+                {0, coords.x, coords.y, coords.z},
+                {0, coords.x, coords.y + 1, coords.z},
+                {0, coords.x, coords.y, coords.z + 1},
+                {0, coords.x, coords.y + 1, coords.z + 1},
+                {1, coords.x, coords.y, coords.z},
+                {1, coords.x - 1, coords.y, coords.z},
+                {1, coords.x, coords.y, coords.z + 1},
+                {1, coords.x - 1, coords.y, coords.z + 1},
+                {3, coords.x, coords.y, coords.z},
+                {3, coords.x - 1, coords.y, coords.z},
+                {3, coords.x, coords.y + 1, coords.z},
+                {3, coords.x - 1, coords.y + 1, coords.z}};
             break;
         case 3:
-            result.push_back({0, coords.x, coords.y, coords.z});
-            result.push_back({0, coords.x + 1, coords.y, coords.z});
-            result.push_back({0, coords.x, coords.y, coords.z + 1});
-            result.push_back({0, coords.x + 1, coords.y, coords.z + 1});
-            result.push_back({1, coords.x, coords.y, coords.z});
-            result.push_back({1, coords.x, coords.y - 1, coords.z});
-            result.push_back({1, coords.x, coords.y, coords.z + 1});
-            result.push_back({1, coords.x, coords.y - 1, coords.z + 1});
-            result.push_back({2, coords.x, coords.y, coords.z});
-            result.push_back({2, coords.x + 1, coords.y, coords.z});
-            result.push_back({2, coords.x, coords.y - 1, coords.z});
-            result.push_back({2, coords.x + 1, coords.y - 1, coords.z});
+            return {
+                {0, coords.x, coords.y, coords.z},
+                {0, coords.x + 1, coords.y, coords.z},
+                {0, coords.x, coords.y, coords.z + 1},
+                {0, coords.x + 1, coords.y, coords.z + 1},
+                {1, coords.x, coords.y, coords.z},
+                {1, coords.x, coords.y - 1, coords.z},
+                {1, coords.x, coords.y, coords.z + 1},
+                {1, coords.x, coords.y - 1, coords.z + 1},
+                {2, coords.x, coords.y, coords.z},
+                {2, coords.x + 1, coords.y, coords.z},
+                {2, coords.x, coords.y - 1, coords.z},
+                {2, coords.x + 1, coords.y - 1, coords.z}};
             break;
         default:
             throw std::out_of_range("coords.w out of range : " + std::to_string(coords.w));

@@ -22,12 +22,11 @@ namespace qss::lattices::two_d
 
     std::vector<square_coords_t> get_closest_neighbours(const square_coords_t &coords)
     {
-        std::vector<square_coords_t> result{};
-        result.push_back({coords.x - 1, coords.y});
-        result.push_back({coords.x, coords.y - 1});
-        result.push_back({coords.x + 1, coords.y});
-        result.push_back({coords.x, coords.y + 1});
-        return result;
+        return {
+            {coords.x - 1, coords.y},
+            {coords.x, coords.y - 1},
+            {coords.x + 1, coords.y},
+            {coords.x, coords.y + 1}};
     }
 
     template <typename node_t> // TODO: добавить require для типа node_t
