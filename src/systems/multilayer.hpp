@@ -14,7 +14,7 @@
 namespace qss::nanostructures
 {
     template <typename lattice_t>
-    concept ThreeD_Lattice = requires std::same_as<typename lattice_t::sizes_t, qss::lattices::three_d::sizes_t>;
+    concept ThreeD_Lattice = std::same_as<typename lattice_t::sizes_t, qss::lattices::three_d::sizes_t>;
 
     template <ThreeD_Lattice lattice_t>
     struct multilayer : public lattice_t
@@ -38,31 +38,31 @@ namespace qss::nanostructures
                 throw std::logic_error("y size must be the same for all lattices : " + std::to_string(value.y) + " != " + std::to_string(sizes.y));
             }
         }
+        typename base_t::base_t::container_t::size_type get_amount_of_node_in_film(const typename base_t::sizes_t::size_type &number) const
+        {
+            return films_thickness[number] * sizes.x * sizes.y;
+        }
 
     public:
-        multilayer(std::initializer_list<lattice_t> list,
-                   std::vector<double> &&J_films_,
-                   std::vector<double> &&J_interlayers_)
+        constexpr multilayer(lattice_t &&first_lattice, double first_film_J)
+            : base_t{std::move(first_lattice)},
+              sizes{first_lattice.sizes},
+              films_thickness{first_lattice.sizes.z},
+              J_films{first_film_J},
+              J_interlayers{} {}
+
+        void add(lattice_t &&film, double J_film, double J_interlayer)
         {
-            if (J_films_.size() != list.size())
-            {
-                throw std::logic_error("you must give exchange integrals for all film : " + std::to_string(J_films_.size()) + " != " + std::to_string(list.size()));
-            }
-            if (J_interlayer_.size() != list.size() - 1)
-            {
-                throw std::logic_error("you must give exchange integrals for all interfilms : " + std::to_string(J_interlayers_.size()) + " != " + std::to_string(list.size() - 1));
-            }
-            J_films = std::move(J_films_);
-            J_interlayers = std::move(J_interlayers_);
-            for (auto &&elem : list)
-            {
-                check_sizes(elem.sizes);
-                sizes.z += elem_sizes.z;
-                films_thickness.push_back(elem_sizes.z);
+            check_sizes(film.sizes);
+            this->reserve(this->size() + film.get_amount_of_nodes());
+            for(auto elem&& : film){
                 this->push_back(std::move(elem));
             }
+            films_thickness.push_back(std::move(lattice.sizes.z));
+            J_films.push_back(J_film);
+            J_interlayers.push_back(J_interlayer);
         }
-    }
+    };
 }
 
 #endif

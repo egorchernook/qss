@@ -13,6 +13,7 @@ namespace qss::models::ising
     using magn = double;
     struct spin
     {
+        using magn_t = magn;
         std::int8_t value = 1;
 
         template <Random random_t = qss::random::mersenne::random_t<>>
@@ -77,6 +78,9 @@ namespace qss::models::ising
     {
         in >> data.value;
         return in;
+    }
+    double abs(const magn& val){
+        return std::abs(val);
     }
 }
 

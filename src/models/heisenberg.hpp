@@ -32,6 +32,7 @@ namespace qss::models::heisenberg
     };
     struct spin
     {
+        using magn_t = magn;
         double x = 1.0;
         double y = 0.0;
         double z = 0.0;

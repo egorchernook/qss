@@ -7,20 +7,16 @@
 
 namespace qss
 {
-    template <
-        typename magn_t,
-        typename lattice_t,
-        typename borders_conditions_t,
-        std::enable_if_t<
-            std::is_convertible_v<typename lattice_t::value_t, magn_t>,
-            bool> = true> // TODO: ограничить typenames
-    magn_t get_sum_of_closest_neighbours(const lattice_t &lattice,
+    template <typename lattice_t,
+              typename borders_conditions_t> // TODO: ограничить typenames
+    typename lattice_t::value_t::magn_t get_sum_of_closest_neighbours(const lattice_t &lattice,
                                          const typename lattice_t::coords_t &central,
                                          borders_conditions_t borders_conditions)
     {
+        using magn_t = typename lattice_t::value_t::magn_t;
         auto neigs = get_closest_neighbours(central);
         const auto sizes = lattice.sizes;
-        
+
         magn_t sum{};
         for (auto it = neigs.begin(); it != neigs.end(); ++it)
         {
@@ -32,24 +28,21 @@ namespace qss
         }
         return sum;
     }
-    template <
-        typename magn_t,
-        typename lattice_t,
-        typename borders_conditions_t,
-        std::enable_if_t<
-            std::is_convertible_v<typename lattice_t::value_t, magn_t>,
-            bool> = true> // TODO: ограничить typenames
-    magn_t get_sum_of_closest_neighbours(const lattice_t &lattice,
+    template <typename lattice_t,
+              typename borders_conditions_t> // TODO: ограничить typenames
+    typename lattice_t::value_t::magn_t get_sum_of_closest_neighbours(const lattice_t &lattice,
                                          const typename lattice_t::coords_t &central,
                                          borders_conditions_t borders_conditions,
                                          double J)
     {
-        if( std::abs(J - 1.0) < std::numeric_limits<double>::epsilon() * 100) {
+        if (std::abs(J - 1.0) < std::numeric_limits<double>::epsilon() * 100)
+        {
             return get_sum_of_closest_neighbours(lattice, central, borders_conditions);
         }
+        using magn_t = typename lattice_t::value_t::magn_t;
         auto neigs = get_closest_neighbours(central);
         const auto sizes = lattice.sizes;
-        
+
         magn_t sum{};
         for (auto it = neigs.begin(); it != neigs.end(); ++it)
         {
@@ -60,7 +53,7 @@ namespace qss
             }
         }
         return sum;
-    }    
+    }
 }
 
 #endif

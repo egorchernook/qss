@@ -26,7 +26,6 @@ std::vector<double> get_temperatures(const double T_begin = 1.5,
 int main()
 {
     using spin_t = qss::models::ising::spin;
-    using magn_t = qss::models::ising::magn;
     using lattice_t = qss::lattices::two_d::square<spin_t>;
     using sizes_t = qss::lattices::two_d::sizes_t;
     using conds = qss::border_conditions::periodic<typename lattice_t::coords_t::size_type, typename sizes_t::size_type>;
@@ -44,7 +43,7 @@ int main()
         -> double
     {
         const auto sum =
-            qss::get_sum_of_closest_neighbours<magn_t>(
+            qss::get_sum_of_closest_neighbours(
                 lattice_,
                 central,
                 qss::border_conditions::use_border_conditions<conds, conds>);
@@ -60,9 +59,10 @@ int main()
         {
             if (mcs % 100 == 0)
             {
+                using qss::models::ising::abs;
                 output << mcs << "\t"
                        << T << "\t"
-                       << std::abs(qss::calculate_magn<lattice_t, magn_t>(lattice))
+                       << abs(qss::calculate_magn(lattice))
                        << "\n";
             }
             qss::algorithms::metropolis::make_step(lattice, delta_energy_f, T);

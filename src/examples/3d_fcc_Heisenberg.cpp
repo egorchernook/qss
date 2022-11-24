@@ -26,7 +26,6 @@ std::vector<double> get_temperatures(const double T_begin = 1.0,
 int main()
 {
     using spin_t = qss::models::heisenberg::spin;
-    using magn_t = qss::models::heisenberg::magn;
     using lattice_t = qss::lattices::three_d::fcc<spin_t>;
     using sizes_t = qss::lattices::three_d::sizes_t;
     using periodic = qss::border_conditions::periodic<typename lattice_t::coords_t::size_type, typename sizes_t::size_type>;;
@@ -45,7 +44,7 @@ int main()
         -> double
     {
         const auto sum =
-            qss::get_sum_of_closest_neighbours<magn_t>(
+            qss::get_sum_of_closest_neighbours(
                 lattice_,
                 central,
                 qss::border_conditions::use_border_conditions<periodic, periodic, sharp>);
@@ -61,7 +60,7 @@ int main()
         {
             if (mcs % 100 == 0)
             {
-                const auto magn = qss::calculate_magn<lattice_t, magn_t>(lattice);
+                const auto magn = qss::calculate_magn(lattice);
                 const auto absl = abs(magn);
                 output << mcs << "\t"
                        << T << "\t"
