@@ -34,52 +34,52 @@ namespace qss::models::ising
         }
     };
 
-    magn operator+(const spin &lhs, const spin &rhs)
+    inline magn operator+(const spin &lhs, const spin &rhs)
     {
         magn result = lhs.value;
         result += rhs.value;
         return result;
     }
-    magn operator-(const spin &lhs, const spin &rhs)
+    inline magn operator-(const spin &lhs, const spin &rhs)
     {
         magn result = lhs.value;
         result -= rhs.value;
         return result;
     }
-    double scalar_multiply(const spin &lhs, const spin &rhs)
+    inline double scalar_multiply(const spin &lhs, const spin &rhs)
     {
         magn result = lhs.value;
         result *= rhs.value;
         return result;
     }
-    magn operator*(const int &lhs, const spin &rhs)
+    inline magn operator*(const int &lhs, const spin &rhs)
     {
         magn result = rhs.value;
         result *= lhs;
         return result;
     }
-    magn operator*(const double &lhs, const spin &rhs)
+    inline magn operator*(const double &lhs, const spin &rhs)
     {
         magn result = rhs.value;
         result *= lhs;
         return result;
     }
-    magn operator*(const spin &lhs, const double &rhs)
+    inline magn operator*(const spin &lhs, const double &rhs)
     {
         return (rhs * lhs);
     }
 
-    std::ostream &operator<<(std::ostream &out, const spin &data)
+    inline std::ostream &operator<<(std::ostream &out, const spin &data)
     {
         out << "( " << data.value << " )";
         return out;
     }
-    std::istream &operator>>(std::istream &in, spin &data)
+    inline std::istream &operator>>(std::istream &in, spin &data)
     {
         in >> data.value;
         return in;
     }
-    double abs(const magn& val){
+    inline double abs(const magn& val){
         return std::abs(val);
     }
 }

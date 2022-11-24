@@ -29,7 +29,7 @@ namespace qss::lattices::three_d
         size_type z = 0;    //
     };
 
-    std::vector<fcc_coords_t> get_closest_neighbours(const fcc_coords_t &coords)
+    inline std::vector<fcc_coords_t> get_closest_neighbours(const fcc_coords_t &coords)
     {
         std::vector<fcc_coords_t> result{};
         switch (coords.w)
@@ -160,7 +160,8 @@ namespace qss::lattices::three_d
                   sizes_t{static_cast<typename sizes_t::size_type>(size_x / 2),
                           static_cast<typename sizes_t::size_type>(size_y / 2 + size_y % 2),
                           static_cast<typename sizes_t::size_type>(size_z / 2)}}
-        {}
+        {
+        }
         constexpr face_centric_cubic(const value_t &initial_spin, const sizes_t &sizes_)
             : face_centric_cubic{initial_spin, sizes_.x, sizes_.y, sizes_.z} {}
         // работает когда есть default параметры конструктора node_t

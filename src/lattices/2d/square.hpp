@@ -20,7 +20,7 @@ namespace qss::lattices::two_d
         size_type y = 0;
     };
 
-    std::vector<square_coords_t> get_closest_neighbours(const square_coords_t &coords)
+    inline std::vector<square_coords_t> get_closest_neighbours(const square_coords_t &coords)
     {
         return {
             {coords.x - 1, coords.y},

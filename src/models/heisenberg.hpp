@@ -59,7 +59,7 @@ namespace qss::models::heisenberg
         }
     };
 
-    magn operator+(const spin &lhs, const spin &rhs)
+    inline magn operator+(const spin &lhs, const spin &rhs)
     {
         magn result{};
         result.x = lhs.x + rhs.x;
@@ -67,7 +67,7 @@ namespace qss::models::heisenberg
         result.z = lhs.z + rhs.z;
         return result;
     }
-    magn operator+(const magn &lhs, const magn &rhs)
+    inline magn operator+(const magn &lhs, const magn &rhs)
     {
         magn result{};
         result.x = lhs.x + rhs.x;
@@ -75,7 +75,7 @@ namespace qss::models::heisenberg
         result.z = lhs.z + rhs.z;
         return result;
     }
-    magn operator-(const spin &lhs, const spin &rhs)
+    inline magn operator-(const spin &lhs, const spin &rhs)
     {
         magn result{};
         result.x = lhs.x - rhs.x;
@@ -83,7 +83,7 @@ namespace qss::models::heisenberg
         result.z = lhs.z - rhs.z;
         return result;
     }
-    magn operator-(const magn &lhs, const magn &rhs)
+    inline magn operator-(const magn &lhs, const magn &rhs)
     {
         magn result{};
         result.x = lhs.x - rhs.x;
@@ -91,7 +91,7 @@ namespace qss::models::heisenberg
         result.z = lhs.z - rhs.z;
         return result;
     }
-    double scalar_multiply(const spin &lhs, const spin &rhs)
+    inline double scalar_multiply(const spin &lhs, const spin &rhs)
     {
         double sum = 0.0;
         sum += lhs.x * rhs.x;
@@ -99,7 +99,7 @@ namespace qss::models::heisenberg
         sum += lhs.z * rhs.z;
         return sum;
     }
-    double scalar_multiply(const magn &lhs, const magn &rhs)
+    inline double scalar_multiply(const magn &lhs, const magn &rhs)
     {
         double sum = 0.0;
         sum += lhs.x * rhs.x;
@@ -107,7 +107,7 @@ namespace qss::models::heisenberg
         sum += lhs.z * rhs.z;
         return sum;
     }
-    magn operator*(const double &lhs, const spin &rhs)
+    inline magn operator*(const double &lhs, const spin &rhs)
     {
         magn result;
         result.x = lhs * rhs.x;
@@ -115,7 +115,7 @@ namespace qss::models::heisenberg
         result.z = lhs * rhs.z;
         return (result);
     }
-    magn operator*(const double &lhs, const magn &rhs)
+    inline magn operator*(const double &lhs, const magn &rhs)
     {
         magn result;
         result.x = lhs * rhs.x;
@@ -123,49 +123,49 @@ namespace qss::models::heisenberg
         result.z = lhs * rhs.z;
         return (result);
     }
-    magn operator*(const spin &lhs, const double &rhs)
+    inline magn operator*(const spin &lhs, const double &rhs)
     {
         return (rhs * lhs);
     }
-    magn operator*(const magn &lhs, const double &rhs)
+    inline magn operator*(const magn &lhs, const double &rhs)
     {
         return (rhs * lhs);
     }
-    magn operator/(const spin &lhs, const double &rhs){
+    inline magn operator/(const spin &lhs, const double &rhs){
         magn result{};
         result.x = lhs.x / rhs;
         result.y = lhs.y / rhs;
         result.z = lhs.z / rhs;
         return result;
     }
-    magn operator/(const magn &lhs, const double &rhs){
+    inline magn operator/(const magn &lhs, const double &rhs){
         magn result{};
         result.x = lhs.x / rhs;
         result.y = lhs.y / rhs;
         result.z = lhs.z / rhs;
         return result;
     }
-    std::ostream &operator<<(std::ostream &out, const spin &data)
+    inline std::ostream &operator<<(std::ostream &out, const spin &data)
     {
         out << "( " << data.x << " , " << data.y << " , " << data.z << " )";
         return out;
     }
-    std::istream &operator>>(std::istream &in, spin &data)
+    inline std::istream &operator>>(std::istream &in, spin &data)
     {
         in >> data.x >> data.y >> data.z;
         return in;
     }
-    std::ostream &operator<<(std::ostream &out, const magn &data)
+    inline std::ostream &operator<<(std::ostream &out, const magn &data)
     {
         out << data.x << "\t" << data.y << "\t" << data.z;
         return out;
     }
-    std::istream &operator>>(std::istream &in, magn &data)
+    inline std::istream &operator>>(std::istream &in, magn &data)
     {
         in >> data.x >> data.y >> data.z;
         return in;
     }
-    double abs(const magn &val)
+    inline double abs(const magn &val)
     {
         return std::sqrt( val.x * val.x + val.y * val.y + val.z * val.z);
     }

@@ -19,7 +19,7 @@ namespace qss
 
     namespace random 
     {
-        std::size_t get_seed(const std::size_t init = 0, const std::size_t top_limiter = 2'004'991) noexcept
+        inline std::size_t get_seed(const std::size_t init = 0, const std::size_t top_limiter = 2'004'991) noexcept
         {
             static std::size_t counter = 0;
 

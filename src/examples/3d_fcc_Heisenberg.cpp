@@ -1,6 +1,7 @@
 #include <fstream>
 #include <iostream>
 #include <numeric>
+#include <vector>
 
 #include "../algorithms/Metropolis.hpp"
 #include "../models/heisenberg.hpp"
