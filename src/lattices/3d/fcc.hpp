@@ -143,9 +143,9 @@ namespace qss::lattices::three_d
                                      const typename sizes_t::size_type &size_x,
                                      const typename sizes_t::size_type &size_y,
                                      const typename sizes_t::size_type &size_z)
-            : base_t{static_cast<typename base_t::size_type>(
+            : base_t(static_cast<typename base_t::size_type>(
                          size_x * size_y * size_z / 2 + (size_x * size_y * size_z) % 2),
-                     initial_spin},
+                     initial_spin),
               sizes{size_x, size_y, size_z},
               sublattices_sizes{
                   sizes_t{static_cast<typename sizes_t::size_type>(size_x / 2 + size_x % 2),
@@ -160,9 +160,7 @@ namespace qss::lattices::three_d
                   sizes_t{static_cast<typename sizes_t::size_type>(size_x / 2),
                           static_cast<typename sizes_t::size_type>(size_y / 2 + size_y % 2),
                           static_cast<typename sizes_t::size_type>(size_z / 2)}}
-        {
-            this->shrink_to_fit();
-        }
+        {}
         constexpr face_centric_cubic(const value_t &initial_spin, const sizes_t &sizes_)
             : face_centric_cubic{initial_spin, sizes_.x, sizes_.y, sizes_.z} {}
         // работает когда есть default параметры конструктора node_t

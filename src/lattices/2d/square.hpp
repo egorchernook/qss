@@ -55,10 +55,8 @@ namespace qss::lattices::two_d
         constexpr square(const value_t &initial_spin,
                          const typename sizes_t::size_type &size_x,
                          const typename sizes_t::size_type &size_y)
-            : base_t{static_cast<typename base_t::size_type>(size_x * size_y), initial_spin}, sizes{size_x, size_y}
-        {
-            this->shrink_to_fit();
-        }
+            : base_t(static_cast<typename base_t::size_type>(size_x * size_y), initial_spin), sizes{size_x, size_y}
+        {}
         constexpr square(const value_t &initial_spin, const sizes_t &sizes_)
             : square{initial_spin, sizes_.x, sizes_.y} {}
         // работает когда есть default параметры конструктора node_t
