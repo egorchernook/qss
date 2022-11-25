@@ -1,10 +1,10 @@
 #ifndef METROPOLIS_HPP_INCLUDED
 #define METROPOLIS_HPP_INCLUDED
 
+#include <type_traits>
+
 #include "../random/random.hpp"
 #include "../random/mersenne.hpp"
-
-#include <type_traits>
 
 namespace qss::algorithms::metropolis
 {
@@ -16,7 +16,7 @@ namespace qss::algorithms::metropolis
               Random random_t = qss::random::mersenne::random_t<>> // TODO: ограничить typename и auto
     void make_step(lattice_t &lattice,
                    delta_energy_f_t delta_energy_f,
-                   const double &temperature)
+                   double temperature)
     {
         static random_t rand{qss::random::get_seed()};
         for (auto _ = 0llu; _ < lattice.get_amount_of_nodes(); ++_)
