@@ -14,6 +14,7 @@ namespace qss::lattices
         using container_t::cbegin;
         using container_t::cend;
         using container_t::container_t;
+        using container_t::operator=;
         using container_t::crbegin;
         using container_t::crend;
         using container_t::end;

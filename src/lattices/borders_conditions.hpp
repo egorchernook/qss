@@ -27,11 +27,11 @@ namespace qss::border_conditions
         {
             if (coord >= size)
             {
-                coord -= size;
+                return {coord - size};
             }
             if (coord < 0)
             {
-                coord += size;
+                return {coord + size};
             }
             return coord;
         }

@@ -134,6 +134,23 @@ namespace qss::lattices::three_d
             {
                 throw std::out_of_range("coords.z out of range : " + std::to_string(coords.z));
             }
+        }
+        typename base_t::size_type get_amount_of_sublattice_nodes(const sizes_t &sublattice_size) const
+        {
+            return sublattice_size.x * sublattice_size.y * sublattice_size.z;
+        }
+        typename base_t::size_type calc_idx(const sizes_t &sublattice_size, const coords_t &coords) const
+        {
+            return static_cast<typename base_t::size_type>(sublattice_size.x * sublattice_size.y * coords.z + sublattice_size.x * coords.y + coords.x);
+        }
+        typename base_t::size_type calc_shift(const std::uint8_t &w) const
+        {
+            typename base_t::size_type result{};
+            for (auto i = 0u; i < w; ++i)
+            {
+                result += get_amount_of_sublattice_nodes(sublattices_sizes[w]);
+            }
+            return result;
         };
 
     public:
@@ -171,50 +188,14 @@ namespace qss::lattices::three_d
         value_t get(const coords_t &coords) const
         {
             bounds_check(coords);
-            auto get_amount_of_sublattice_nodes = [](const sizes_t &sublattice_size)
-                -> typename base_t::size_type
-            {
-                return sublattice_size.x * sublattice_size.y * sublattice_size.z;
-            };
-            auto calc_idx = [&coords](const sizes_t &sublattice_size) -> typename base_t::size_type
-            {
-                return static_cast<typename base_t::size_type>(sublattice_size.x * sublattice_size.y * coords.z + sublattice_size.x * coords.y + coords.x);
-            };
-            const auto shift = [*this, &get_amount_of_sublattice_nodes](const std::uint8_t &w)
-            {
-                typename base_t::size_type result{};
-                for (auto i = 0u; i < w; ++i)
-                {
-                    result += get_amount_of_sublattice_nodes(sublattices_sizes[w]);
-                }
-                return result;
-            }(coords.w);
-            const typename base_t::size_type idx = shift + calc_idx(sublattices_sizes[coords.w]);
+            const typename base_t::size_type idx = calc_shift(coords.w) + calc_idx(sublattices_sizes[coords.w], coords);
             assert(idx <= this->size());
             return this->at(idx);
         }
         void set(const value_t &value, const coords_t &coords)
         {
             bounds_check(coords);
-            auto get_amount_of_sublattice_nodes = [](const sizes_t &sublattice_size)
-                -> typename base_t::size_type
-            {
-                return sublattice_size.x * sublattice_size.y * sublattice_size.z;
-            };
-            auto calc_idx = [&coords](const sizes_t &sublattice_size) -> typename base_t::size_type
-            {
-                return static_cast<typename base_t::size_type>(sublattice_size.x * sublattice_size.y * coords.z + sublattice_size.x * coords.y + coords.x);
-            };
-            const auto shift = [*this, &get_amount_of_sublattice_nodes](const std::uint8_t &w)
-            {
-                typename base_t::size_type result{};
-                for (auto i = 0u; i < w; ++i)
-                {
-                    result += get_amount_of_sublattice_nodes(sublattices_sizes[w]);
-                }
-                return result;
-            }(coords.w);
-            const typename base_t::size_type idx = shift + calc_idx(sublattices_sizes[coords.w]);
+            const typename base_t::size_type idx = calc_shift(coords.w) + calc_idx(sublattices_sizes[coords.w], coords);
             assert(idx <= this->size());
             this->at(idx) = value;
         }
