@@ -14,13 +14,13 @@
 
 namespace qss::lattices::three_d
 {
-    /* 
+    /*
      * реализует координаты на ГЦК решётке
      * {w} = 0 -- базовая решётка
      * {w} = 1 -- смещённая в Oxy решётка
      * {w} = 2 -- смещённая в Oyz решётка
      * {w} = 3 -- смещённая в Oxz решётка
-    **/
+     **/
     struct fcc_coords_t
     {
         using size_type = int;
@@ -102,12 +102,12 @@ namespace qss::lattices::three_d
         return result;
     }
 
-    /* 
+    /*
      * реализует границентрированную решётку.
      * её можно представить как 4 простые кубические
      * со смещением относительно друг друга
      * шаблонный параметр {node_t} -- тип хранимого узла (обычно просто спин нужной модели)
-    **/
+     **/
     template <typename node_t> // TODO: добавить require для типа node_t
     struct face_centric_cubic : public base_lattice_t<node_t, fcc_coords_t>
     {

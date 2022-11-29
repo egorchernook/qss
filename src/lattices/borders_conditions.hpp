@@ -15,6 +15,7 @@
 namespace qss::border_conditions
 {
     template <typename coord_size_t, typename size_type>
+    requires std::is_convertible_v<coord_size_t, int> && std::is_convertible_v<size_type, int>
     struct linear_border_conditions
     {
         using coord_size_type = coord_size_t;

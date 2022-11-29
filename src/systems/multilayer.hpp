@@ -8,10 +8,15 @@
 #include <concepts>
 #include <algorithm>
 #include <utility>
+#include <type_traits>
+#include <optional>
 
 #include "../lattices/3d/3d.hpp"
+#include "../lattices/3d/fcc.hpp"
 #include "../lattices/borders_conditions.hpp"
 #include "../utility/functions.hpp"
+#include "../random/random.hpp"
+#include "../random/mersenne.hpp"
 
 namespace qss::nanostructures
 {
@@ -19,47 +24,71 @@ namespace qss::nanostructures
     concept ThreeD_Lattice = std::same_as<typename lattice_t::sizes_t, qss::lattices::three_d::sizes_t>;
 
     template <ThreeD_Lattice lattice_t>
-    struct film : public lattice_t
+    struct film final : public lattice_t
     {
-        using xy_border_condition = typename qss::border_conditions::periodic;
-        using z_border_condition = typename qss::border_conditions::sharp;
+        using xy_border_condition = typename qss::border_conditions::periodic<typename lattice_t::coords_t::size_type, typename lattice_t::sizes_t::size_type>;
+        using z_border_condition = typename qss::border_conditions::sharp<typename lattice_t::coords_t::size_type, typename lattice_t::sizes_t::size_type>;
         double J;
+
+        film(const lattice_t &lattice, double J_ = 1.0) : lattice_t{lattice}, J{J_} {};
+        film(lattice_t &&lattice, double J_ = 1.0) noexcept : lattice_t{std::move(lattice)}, J{J_} {};
     };
 
     template <ThreeD_Lattice lattice_t>
-    typename film<lattice_t>::value_t::magn_t
-    get_sum_of_closest_neighbours(const film<lattice_t> &film,
-                                  const typename film<lattice_t>::coords_t &central)
+    requires std::is_same_v<typename lattice_t::coords_t, qss::lattices::three_d::fcc_coords_t>
+        std::optional<qss::lattices::three_d::fcc_coords_t>
+        get_closest_neigbour_from_upper_film(const film<lattice_t> &other,
+                                             const qss::lattices::three_d::fcc_coords_t &coord)
     {
-        using film_t = typename film<lattice_t>;
-        return J * get_sum_of_closest_neighbours(film, central,
-                                                 qss::border_conditions::use_border_conditions<
-                                                     film_t::xy_border_condition,
-                                                     film_t::xy_border_condition,
-                                                     film_t::z_border_condition>);
+        auto result = coord;
+        if (coord.z > 0 || coord.z < other.sublattices_sizes[coord.w].z - 1)
+        {
+            return {};
+        }
+        result.z = other.sublattices_sizes[coord.w].z - 1;
+        return result;
+    }
+    template <ThreeD_Lattice lattice_t>
+    requires std::is_same_v<typename lattice_t::coords_t, qss::lattices::three_d::fcc_coords_t>
+        std::optional<qss::lattices::three_d::fcc_coords_t>
+        get_closest_neigbour_from_lower_film(const film<lattice_t> &other,
+                                             const qss::lattices::three_d::fcc_coords_t &coord)
+    {
+        auto result = coord;
+        if (coord.z > 0 || coord.z < other.sublattices_sizes[coord.w].z - 1)
+        {
+            return {};
+        }
+        result.z = 0;
+        return result;
     }
 
     template <ThreeD_Lattice lattice_t>
-    class multilayer : private std::vector<film<lattice_t>>
+    class multilayer final
     {
         using container_t = typename std::vector<film<lattice_t>>;
         container_t films;
         std::vector<double> J_interlayers; // обменные интегралы взаимодействий плёнок.
 
-        void check_sizes(const sizes_t &value) const
+        void check_sizes(const typename film<lattice_t>::sizes_t &value) const
         {
-            if (value.x != sizes.x)
+            if (value.x != films[0].sizes.x)
             {
-                throw std::logic_error("x size must be the same for all lattices : " + std::to_string(value.x) + " != " + std::to_string(sizes.x));
+                throw std::out_of_range("x size must be the same for all lattices : " + std::to_string(value.x) + " != " + std::to_string(films[0].sizes.x));
             }
-            if (value.y != sizes.y)
+            if (value.y != films[0].sizes.y)
             {
-                throw std::logic_error("y size must be the same for all lattices : " + std::to_string(value.y) + " != " + std::to_string(sizes.y));
+                throw std::out_of_range("y size must be the same for all lattices : " + std::to_string(value.y) + " != " + std::to_string(films[0].sizes.y));
             }
         }
 
     public:
-        using film_t = typename film<lattice_t>;
+        using film_t = film<lattice_t>;
+        struct coords_t
+        {
+            typename film_t::coords_t film_coord;
+            typename container_t::size_type idx;
+        };
 
         constexpr multilayer(const film_t &film) : films{film} {};
         constexpr multilayer(film_t &&film) : films{std::move(film)} {};
@@ -83,12 +112,97 @@ namespace qss::nanostructures
             J_interlayers.pop_back();
             return result;
         }
-        const film_t &get(container_t::size_type idx)
+
+    private:
+        typename film_t::value_t::magn_t
+        get_sum_of_closest_neighbours(typename container_t::size_type idx,
+                                      const typename film_t::coords_t &central) const
         {
-            return films.at(idx);
+            const auto film = films[idx];
+            bool has_upper = idx != films.size() - 1u;
+            bool has_lower = idx != 0;
+
+            using magn_t = typename film_t::value_t::magn_t;
+            auto borders_conditions = [](const typename film_t::coords_t &coord_,
+                                         const typename film_t::sizes_t &sizes)
+            {
+                return qss::border_conditions::use_border_conditions<
+                    typename film_t::xy_border_condition,
+                    typename film_t::xy_border_condition,
+                    typename film_t::z_border_condition>(coord_, sizes);
+            };
+            auto neigs = get_closest_neighbours(central);
+            const auto sizes = film.sizes;
+
+            magn_t sum{};
+            magn_t upper_neig_val{};
+            magn_t lower_neig_val{};
+            for (auto it = neigs.begin(); it != neigs.end(); ++it)
+            {
+                const auto coord = borders_conditions(*it, sizes);
+                if (coord)
+                {
+                    sum += film.get(coord.value());
+                }
+                else
+                {
+                    if (has_upper)
+                    {
+                        const auto neig = get_closest_neigbour_from_upper_film(films[idx + 1u], central);
+                        upper_neig_val += neig ? films[idx + 1u].get(neig.value()) : magn_t{};
+                    }
+                    if (has_lower)
+                    {
+                        const auto neig = get_closest_neigbour_from_lower_film(films[idx - 1u], central);
+                        lower_neig_val += neig ? films[idx - 1u].get(neig.value()) : magn_t{};
+                    }
+                }
+            }
+            sum *= film.J;
+            if (has_upper)
+            {
+                sum += J_interlayers[idx] * upper_neig_val;
+            }
+            if (has_lower)
+            {
+                sum += J_interlayers[idx - 1u] * lower_neig_val;
+            }
+            return sum;
         }
 
-        
+    public:
+        double T = 0.0;
+
+        using delta_h_t = auto(*)(const typename film_t::value_t::magn_t &,
+                                  const typename film_t::value_t &,
+                                  const typename film_t::value_t &) -> double;
+        /*
+         * использует алгоритм Метрополиса
+         * необходимо установить температуру, перед использованием
+         **/
+        void evolve(delta_h_t delta_h = [](const typename film_t::value_t::magn_t &sum,
+                                           const typename film_t::value_t &spin_old,
+                                           const typename film_t::value_t &spin_new) -> double
+                    {
+                        return scalar_multiply(sum, spin_old - spin_new);
+                    })
+        {
+            for (auto idx = 0u; idx < films.size(); ++idx)
+            {
+                auto delta_energy_f = [&delta_h, &idx, this](const lattice_t &lattice_,
+                                                           const typename lattice_t::coords_t &central,
+                                                           const typename lattice_t::value_t &new_spin)
+                    -> double
+                {
+                    const auto sum = get_sum_of_closest_neighbours(idx, central);
+                    return delta_h(sum, lattice_.get(central), new_spin);
+                };
+
+                qss::algorithms::metropolis::make_step(films[idx], delta_energy_f, T);
+            }
+        }
+
+
     };
 }
 

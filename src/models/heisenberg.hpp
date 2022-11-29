@@ -21,12 +21,25 @@ namespace qss::models::heisenberg
             z += rhs.z;
             return *this;
         }
-
         magn &operator-=(const magn &rhs)
         {
             x -= rhs.x;
             y -= rhs.y;
             z -= rhs.z;
+            return *this;
+        }
+        magn &operator*=(const double &rhs)
+        {
+            x *= rhs;
+            y *= rhs;
+            z *= rhs;
+            return *this;
+        }
+        magn &operator/=(const double &rhs)
+        {
+            x /= rhs;
+            y /= rhs;
+            z /= rhs;
             return *this;
         }
     };
@@ -131,14 +144,16 @@ namespace qss::models::heisenberg
     {
         return (rhs * lhs);
     }
-    inline magn operator/(const spin &lhs, const double &rhs){
+    inline magn operator/(const spin &lhs, const double &rhs)
+    {
         magn result{};
         result.x = lhs.x / rhs;
         result.y = lhs.y / rhs;
         result.z = lhs.z / rhs;
         return result;
     }
-    inline magn operator/(const magn &lhs, const double &rhs){
+    inline magn operator/(const magn &lhs, const double &rhs)
+    {
         magn result{};
         result.x = lhs.x / rhs;
         result.y = lhs.y / rhs;
@@ -167,7 +182,7 @@ namespace qss::models::heisenberg
     }
     inline double abs(const magn &val)
     {
-        return std::sqrt( val.x * val.x + val.y * val.y + val.z * val.z);
+        return std::sqrt(val.x * val.x + val.y * val.y + val.z * val.z);
     }
 }
 #endif
