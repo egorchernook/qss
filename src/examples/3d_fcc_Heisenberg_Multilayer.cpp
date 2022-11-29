@@ -28,11 +28,16 @@ int main()
     structure.add(snd_film, -0.1);
 
     constexpr static std::uint32_t mcs_amount = 5'000;
-    
+
     structure.T = 0.5;
     for (std::size_t mcs = 0; mcs <= mcs_amount; ++mcs)
     {
         structure.evolve();
+        const auto magns = structure.get_magns();
+        std::cout << mcs << "\t"
+                  << abs(magns[0]) - abs(magns[1]) << "\t"
+                  << abs(magns[0]) << "\t"
+                  << abs(magns[1]) << "\n";
     }
 
     return 0;

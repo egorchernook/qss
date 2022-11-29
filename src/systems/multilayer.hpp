@@ -10,6 +10,7 @@
 #include <utility>
 #include <type_traits>
 #include <optional>
+#include <algorithm>
 
 #include "../lattices/3d/3d.hpp"
 #include "../lattices/3d/fcc.hpp"
@@ -90,25 +91,32 @@ namespace qss::nanostructures
             typename container_t::size_type idx;
         };
 
-        constexpr multilayer(const film_t &film) : films{film} {};
-        constexpr multilayer(film_t &&film) : films{std::move(film)} {};
+        constexpr multilayer(const film_t &film)
+            : films{film},
+              magns{calculate_magn(film)} {};
+        constexpr multilayer(film_t &&film)
+            : films{std::move(film)},
+              magns{calculate_magn(film)} {};
 
         void add(const film_t &film, double J_interlayer)
         {
             check_sizes(film.sizes);
             films.push_back(film);
+            magns.push_back(calculate_magn(film));
             J_interlayers.push_back(J_interlayer);
         }
         void add(film_t &&film, double J_interlayer)
         {
             check_sizes(film.sizes);
             films.push_back(std::move(film));
+            magns.push_back(calculate_magn(film));
             J_interlayers.push_back(J_interlayer);
         }
         film_t pop()
         {
             film_t result = films.back();
             films.pop_back();
+            magns.pop_back();
             J_interlayers.pop_back();
             return result;
         }
@@ -170,7 +178,13 @@ namespace qss::nanostructures
             return sum;
         }
 
+        std::vector<typename film_t::value_t::magn_t> magns;
+
     public:
+        std::vector<typename film_t::value_t::magn_t> get_magns() const noexcept
+        {
+            return magns;
+        }
         double T = 0.0;
 
         using delta_h_t = auto(*)(const typename film_t::value_t::magn_t &,
@@ -190,19 +204,18 @@ namespace qss::nanostructures
             for (auto idx = 0u; idx < films.size(); ++idx)
             {
                 auto delta_energy_f = [&delta_h, &idx, this](const lattice_t &lattice_,
-                                                           const typename lattice_t::coords_t &central,
-                                                           const typename lattice_t::value_t &new_spin)
+                                                             const typename lattice_t::coords_t &central,
+                                                             const typename lattice_t::value_t &new_spin)
                     -> double
                 {
                     const auto sum = get_sum_of_closest_neighbours(idx, central);
                     return delta_h(sum, lattice_.get(central), new_spin);
                 };
 
-                qss::algorithms::metropolis::make_step(films[idx], delta_energy_f, T);
+                auto [M, E] = qss::algorithms::metropolis::make_step(films[idx], delta_energy_f, T);
+                magns[idx] += M / static_cast<double>(films[idx].get_amount_of_nodes());
             }
         }
-
-
     };
 }
 

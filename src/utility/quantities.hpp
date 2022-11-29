@@ -19,7 +19,6 @@ namespace qss
         return magn / static_cast<double>(lattice.get_amount_of_nodes());
     }
 
-    /*
     template <typename lattice_t, typename borders_conditions_t>
     double calculate_energy(const lattice_t &lattice, borders_conditions_t borders_conditions)
     {
@@ -37,7 +36,6 @@ namespace qss
 
         return 0.5 * energy / static_cast<double>(lattice.get_amount_of_nodes());
     }
-    */
 }
 
 #endif
