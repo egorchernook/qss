@@ -10,7 +10,7 @@ namespace qss::algorithms::metropolis
 {
     /*
      * Свободная процедура для прохождения одного шага Монте-Карло.
-     */
+    **/
     template <typename lattice_t,
               typename delta_energy_f_t,
               Random random_t = qss::random::mersenne::random_t<>> // TODO: ограничить typename и auto
