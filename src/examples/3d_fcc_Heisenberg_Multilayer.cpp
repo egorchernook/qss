@@ -20,7 +20,7 @@ int main()
     using qss::nanostructures::film;
     using qss::nanostructures::multilayer;
 
-    constexpr static sizes_t sizes{16, 16, 3};
+    constexpr static sizes_t sizes{64, 64, 3};
     const film<lattice_t> fst_film{lattice_t{spin_t{1.0, 0.0, 0.0}, sizes}, 1.0};
     const film<lattice_t> snd_film{lattice_t{spin_t{-1.0, 0.0, 0.0}, sizes}, 1.0};
 
@@ -28,16 +28,26 @@ int main()
     structure.add(snd_film, -0.1);
 
     constexpr static std::uint32_t mcs_amount = 5'000;
-
+    constexpr static double Delta = 0.665;
     structure.T = 0.5;
     for (std::size_t mcs = 0; mcs <= mcs_amount; ++mcs)
     {
-        structure.evolve();
+        structure.evolve([](const typename spin_t::magn_t &sum,
+                            const spin_t &spin_old,
+                            const spin_t &spin_new) -> double {
+                                auto diff = spin_old - spin_new;
+                                diff.z *= (1.0 - Delta);
+                                return scalar_multiply(sum, diff);
+                            });
         const auto magns = structure.get_magns();
+        const auto magn1 = magns[0];
+        const auto magn2 = magns[1];
         std::cout << mcs << "\t"
-                  << abs(magns[0]) - abs(magns[1]) << "\t"
-                  << abs(magns[0]) << "\t"
-                  << abs(magns[1]) << "\n";
+                  // << abs(magn1) - abs(magn2) << "\t"
+                  << abs(magn1) << "\t"
+                  << magn1 << "\t"
+                  << abs(magn2) << "\t"
+                  << magn2 << std::endl;
     }
 
     return 0;
