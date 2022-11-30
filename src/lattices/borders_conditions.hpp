@@ -46,10 +46,7 @@ namespace qss::border_conditions
             {
                 return {};
             }
-            else
-            {
-                return coord;
-            }
+            return coord;
         }
     };
 
@@ -67,15 +64,12 @@ namespace qss::border_conditions
         static const y_conds_t y_conds{};
         const auto x = x_conds(coord.x, sizes.x);
         const auto y = y_conds(coord.y, sizes.y);
-        if (!x.has_value() || !y.has_value())
+        if (!x.has_value() + !y.has_value())
         {
             return {};
         }
-        else
-        {
-            return typename qss::lattices::two_d::square_coords_t{static_cast<coords_t_size_type>(x.value()),
-                                                                  static_cast<coords_t_size_type>(y.value())};
-        }
+        return typename qss::lattices::two_d::square_coords_t{static_cast<coords_t_size_type>(x.value()),
+                                                              static_cast<coords_t_size_type>(y.value())};
     }
 
     template <typename x_conds_t, typename y_conds_t, typename z_conds_t>
@@ -127,7 +121,7 @@ namespace qss::border_conditions
         const auto x = x_conds(coord.x, sublattice_size.x);
         const auto y = y_conds(coord.y, sublattice_size.y);
         const auto z = z_conds(coord.z, sublattice_size.z);
-        if (!x.has_value() || !y.has_value() || !z.has_value())
+        if (!x.has_value() + !y.has_value() + !z.has_value())
         {
             return {};
         }

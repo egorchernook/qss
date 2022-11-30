@@ -27,28 +27,34 @@ int main()
     multilayer structure{fst_film};
     structure.add(snd_film, -0.1);
 
-    constexpr static std::uint32_t mcs_amount = 5'000;
+    constexpr static std::uint32_t mcs_amount = 2'000;
     constexpr static double Delta = 0.665;
     structure.T = 0.5;
+    std::ofstream out{"m.txt"};
     for (std::size_t mcs = 0; mcs <= mcs_amount; ++mcs)
     {
+        if(mcs % 10 == 0) {
+            std::cout << mcs << "\n";
+        }
         structure.evolve([](const typename spin_t::magn_t &sum,
                             const spin_t &spin_old,
-                            const spin_t &spin_new) -> double {
+                            const spin_t &spin_new) -> double
+                         {
                                 auto diff = spin_old - spin_new;
                                 diff.z *= (1.0 - Delta);
-                                return scalar_multiply(sum, diff);
-                            });
+                                return scalar_multiply(sum, diff); });
         const auto magns = structure.get_magns();
         const auto magn1 = magns[0];
         const auto magn2 = magns[1];
-        std::cout << mcs << "\t"
-                  // << abs(magn1) - abs(magn2) << "\t"
-                  << abs(magn1) << "\t"
-                  << magn1 << "\t"
-                  << abs(magn2) << "\t"
-                  << magn2 << std::endl;
+        out << mcs << "\t"
+            << abs(magn1) - abs(magn2) << "\t"
+            << abs(magn1) << "\t"
+            << magn1 << "\t"
+            << abs(magn2) << "\t"
+            << magn2 << std::endl;
     }
+    out.flush();
+    out.close();
 
     return 0;
 }
