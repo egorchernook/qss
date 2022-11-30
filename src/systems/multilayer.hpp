@@ -93,16 +93,19 @@ namespace qss::nanostructures
 
         constexpr multilayer(const film_t &film)
             : films{film},
-              magns{calculate_magn(film)} {};
+              magns{calculate_magn(film)},
+              energies{0.0} {};
         constexpr multilayer(film_t &&film)
             : films{std::move(film)},
-              magns{calculate_magn(film)} {};
+              magns{calculate_magn(film)},
+              energies{0.0} {};
 
         void add(const film_t &film, double J_interlayer)
         {
             check_sizes(film.sizes);
             films.push_back(film);
             magns.push_back(calculate_magn(film));
+            energies.push_back(0.0);
             J_interlayers.push_back(J_interlayer);
         }
         void add(film_t &&film, double J_interlayer)
@@ -110,6 +113,7 @@ namespace qss::nanostructures
             check_sizes(film.sizes);
             films.push_back(std::move(film));
             magns.push_back(calculate_magn(film));
+            energies.push_back(0.0);
             J_interlayers.push_back(J_interlayer);
         }
         film_t pop()
@@ -117,6 +121,7 @@ namespace qss::nanostructures
             film_t result = films.back();
             films.pop_back();
             magns.pop_back();
+            energies.pop_back();
             J_interlayers.pop_back();
             return result;
         }
@@ -179,11 +184,16 @@ namespace qss::nanostructures
         }
 
         std::vector<typename film_t::value_t::magn_t> magns;
+        std::vector<double> energies;
 
     public:
         std::vector<typename film_t::value_t::magn_t> get_magns() const noexcept
         {
             return magns;
+        }
+        std::vector<double> get_energies() const noexcept
+        {
+            return energies;
         }
         double T = 0.0;
 
@@ -214,6 +224,7 @@ namespace qss::nanostructures
 
                 auto [M, E] = qss::algorithms::metropolis::make_step(films[idx], delta_energy_f, T);
                 magns[idx] += M / static_cast<double>(films[idx].get_amount_of_nodes());
+                energies[idx] += -0.5 * E / static_cast<double>(films[idx].get_amount_of_nodes());
             }
         }
     };

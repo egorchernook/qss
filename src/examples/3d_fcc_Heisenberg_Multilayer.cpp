@@ -30,10 +30,11 @@ int main()
     constexpr static std::uint32_t mcs_amount = 2'000;
     constexpr static double Delta = 0.665;
     structure.T = 0.5;
-    std::ofstream out{"m.txt"};
+    std::ofstream out_magn{"m.txt"};
     for (std::size_t mcs = 0; mcs <= mcs_amount; ++mcs)
     {
-        if(mcs % 10 == 0) {
+        if (mcs % 10 == 0)
+        {
             std::cout << mcs << "\n";
         }
         structure.evolve([](const typename spin_t::magn_t &sum,
@@ -46,15 +47,15 @@ int main()
         const auto magns = structure.get_magns();
         const auto magn1 = magns[0];
         const auto magn2 = magns[1];
-        out << mcs << "\t"
-            << abs(magn1) - abs(magn2) << "\t"
-            << abs(magn1) << "\t"
-            << magn1 << "\t"
-            << abs(magn2) << "\t"
-            << magn2 << std::endl;
-    }
-    out.flush();
-    out.close();
 
+        out_magn << mcs << "\t"
+                 << abs(magn1) - abs(magn2) << "\t"
+                 << abs(magn1) << "\t"
+                 << magn1 << "\t"
+                 << abs(magn2) << "\t"
+                 << magn2 << std::endl;
+    }
+    out_magn.flush();
+    out_magn.close();
     return 0;
 }
