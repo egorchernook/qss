@@ -20,7 +20,7 @@ namespace qss::lattices::two_d
         size_type y = 0;
     };
 
-    inline std::vector<square_coords_t> get_closest_neighbours(const square_coords_t &coords)
+    [[nodiscard]] inline std::vector<square_coords_t> get_closest_neighbours(const square_coords_t &coords) noexcept
     {
         return {
             {coords.x - 1, coords.y},
@@ -63,7 +63,7 @@ namespace qss::lattices::two_d
         constexpr explicit square(const sizes_t &sizes_)
             : square{value_t{}, sizes_.x, sizes_.y} {}
 
-        value_t get(const coords_t &coords) const
+        [[nodiscard]] value_t get(const coords_t &coords) const
         {
             bounds_check(coords);
             const auto idx = static_cast<typename base_t::size_type>(sizes.x * coords.y + coords.x);
@@ -77,7 +77,7 @@ namespace qss::lattices::two_d
         }
 
         template <typename random_t = qss::random::mersenne::random_t<>>
-        coords_t choose_random_node() const
+        [[nodiscard]] coords_t choose_random_node() const noexcept
         {
             static auto rand = random_t{qss::random::get_seed()};
             return coords_t{

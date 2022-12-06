@@ -23,13 +23,13 @@ namespace qss::lattices
 
         using value_t = node_t;
         using coords_t = coordinates_t;
-        constexpr typename container_t::size_type get_amount_of_nodes() const
+        [[nodiscard]] constexpr typename container_t::size_type get_amount_of_nodes() const noexcept
         {
             return this->size();
         }
 
         virtual ~base_lattice_t() noexcept {};
-        virtual value_t get(const coords_t &coord) const = 0;
+        [[nodiscard]] virtual value_t get(const coords_t &coord) const = 0;
         virtual void set(const node_t &value, const coords_t &coords) = 0;
 
     protected:

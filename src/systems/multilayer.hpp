@@ -87,9 +87,19 @@ namespace qss::nanostructures
         using film_t = film<lattice_t>;
         struct coords_t
         {
-            typename film_t::coords_t film_coord;
             typename container_t::size_type idx;
+            typename film_t::coords_t film_coord;
         };
+
+        template <typename random_t = qss::random::mersenne::random_t<>>
+        coords_t get_random_coord() const
+        {
+            using size_type = typename container_t::size_type;
+            static auto rand = random_t{qss::random::get_seed()};
+            const size_type idx = static_cast<size_type>(rand(0, films.size()));
+            const auto coord = films[idx].choose_random_node();
+            return {idx, coord};
+        }
 
         constexpr multilayer(const film_t &film)
             : films{film},
@@ -125,12 +135,17 @@ namespace qss::nanostructures
             J_interlayers.pop_back();
             return result;
         }
+        const container_t &get_films() const noexcept
+        {
+            return films;
+        }
 
     private:
         typename film_t::value_t::magn_t
-        get_sum_of_closest_neighbours(typename container_t::size_type idx,
-                                      const typename film_t::coords_t &central) const
+        get_sum_of_closest_neighbours(const coords_t &central_) const
         {
+            const auto idx = central_.idx;
+            const auto central = central_.film_coord;
             const auto film = films[idx];
             bool has_upper = idx != films.size() - 1u;
             bool has_lower = idx != 0;
@@ -218,7 +233,7 @@ namespace qss::nanostructures
                                                              const typename lattice_t::value_t &new_spin)
                     -> double
                 {
-                    const auto sum = get_sum_of_closest_neighbours(idx, central);
+                    const auto sum = get_sum_of_closest_neighbours({idx, central});
                     return delta_h(sum, lattice_.get(central), new_spin);
                 };
 

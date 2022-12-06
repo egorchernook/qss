@@ -24,7 +24,8 @@ namespace qss::border_conditions
     template <typename coord_size_t, typename size_type>
     struct periodic : linear_border_conditions<coord_size_t, size_type>
     {
-        std::optional<coord_size_t> operator()(coord_size_t coord, const size_type &size) const
+        [[nodiscard]] std::optional<coord_size_t>
+        operator()(coord_size_t coord, const size_type &size) const noexcept
         {
             if (coord >= size)
             {
@@ -40,7 +41,8 @@ namespace qss::border_conditions
     template <typename coord_size_t, typename size_type>
     struct sharp : linear_border_conditions<coord_size_t, size_type>
     {
-        std::optional<coord_size_t> operator()(coord_size_t coord, const size_type &size) const
+        [[nodiscard]] std::optional<coord_size_t>
+        operator()(coord_size_t coord, const size_type &size) const noexcept
         {
             if (coord < 0 || coord >= size)
             {
@@ -55,8 +57,8 @@ namespace qss::border_conditions
                             typename y_conds_t::coord_size_type> &&
         std::is_same_v<typename x_conds_t::sizes_size_type,
                        typename y_conds_t::sizes_size_type>
-    auto use_border_conditions(const typename qss::lattices::two_d::square_coords_t &coord,
-                               const typename qss::lattices::two_d::sizes_t &sizes)
+    [[nodiscard]] auto use_border_conditions(const typename qss::lattices::two_d::square_coords_t &coord,
+                                             const typename qss::lattices::two_d::sizes_t &sizes) noexcept
         -> std::optional<typename qss::lattices::two_d::square_coords_t>
     {
         using coords_t_size_type = typename qss::lattices::two_d::square_coords_t::size_type;
@@ -81,8 +83,8 @@ namespace qss::border_conditions
                        typename y_conds_t::sizes_size_type> &&
         std::is_same_v<typename y_conds_t::sizes_size_type,
                        typename z_conds_t::sizes_size_type>
-    auto use_border_conditions(const typename qss::lattices::three_d::fcc_coords_t &coord,
-                               const typename qss::lattices::three_d::sizes_t &sizes)
+    [[nodiscard]] auto use_border_conditions(const typename qss::lattices::three_d::fcc_coords_t &coord,
+                                             const typename qss::lattices::three_d::sizes_t &sizes)
         -> std::optional<typename qss::lattices::three_d::fcc_coords_t>
     {
         using coords_t_size_type = typename qss::lattices::three_d::fcc_coords_t::size_type;

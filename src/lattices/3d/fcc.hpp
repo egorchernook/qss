@@ -30,7 +30,7 @@ namespace qss::lattices::three_d
         size_type z = 0;    //
     };
 
-    inline std::vector<fcc_coords_t> get_closest_neighbours(const fcc_coords_t &coords)
+    [[nodiscard]] inline std::vector<fcc_coords_t> get_closest_neighbours(const fcc_coords_t &coords)
     {
         std::vector<fcc_coords_t> result{};
         switch (coords.w)
@@ -187,7 +187,7 @@ namespace qss::lattices::three_d
         constexpr face_centric_cubic(const sizes_t &sizes_)
             : face_centric_cubic{value_t{}, sizes_.x, sizes_.y, sizes_.z} {}
 
-        value_t get(const coords_t &coords) const
+        [[nodiscard]] value_t get(const coords_t &coords) const
         {
             bounds_check(coords);
             const typename base_t::size_type idx = calc_shift(coords.w) + calc_idx(sublattices_sizes[coords.w], coords);
@@ -203,7 +203,7 @@ namespace qss::lattices::three_d
         }
 
         template <typename random_t = qss::random::mersenne::random_t<>>
-        coords_t choose_random_node() const
+        [[nodiscard]] coords_t choose_random_node() const noexcept
         {
             using coord_size_t = typename coords_t::size_type;
             static auto rand = random_t{qss::random::get_seed()};
