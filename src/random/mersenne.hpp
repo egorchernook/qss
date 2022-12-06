@@ -22,10 +22,10 @@ namespace qss::random::mersenne
     public:
         random_t() noexcept : m_genrand(random_t<genrand_t>::seed_default) {}
 
-        random_t(const random_t<genrand_t> &) noexcept = default;
-        random_t(random_t<genrand_t> &&) noexcept = default;
+        [[nodiscard]] random_t(const random_t<genrand_t> &) noexcept = default;
+        [[nodiscard]] random_t(random_t<genrand_t> &&) noexcept = default;
 
-        random_t(const typename genrand_t::result_type seed) noexcept : m_genrand(seed) {}
+        [[nodiscard]] random_t(const typename genrand_t::result_type seed) noexcept : m_genrand(seed) {}
 
         ~random_t() noexcept = default;
 

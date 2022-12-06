@@ -25,7 +25,7 @@ int main()
     const film<lattice_t> snd_film{lattice_t{spin_t{-1.0, 0.0, 0.0}, sizes}, 1.0};
 
     multilayer structure{fst_film};
-    structure.add(snd_film, -0.1);
+    structure.add_film(snd_film, -0.1);
 
     constexpr static std::uint32_t mcs_amount = 2'000;
     constexpr static double Delta = 0.665;

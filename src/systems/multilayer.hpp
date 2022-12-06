@@ -37,9 +37,9 @@ namespace qss::nanostructures
 
     template <ThreeD_Lattice lattice_t>
     requires std::is_same_v<typename lattice_t::coords_t, qss::lattices::three_d::fcc_coords_t>
-        std::optional<qss::lattices::three_d::fcc_coords_t>
-        get_closest_neigbour_from_upper_film(const film<lattice_t> &other,
-                                             const qss::lattices::three_d::fcc_coords_t &coord)
+    [[nodiscard]] std::optional<qss::lattices::three_d::fcc_coords_t>
+    get_closest_neigbour_from_upper_film(const film<lattice_t> &other,
+                                         const qss::lattices::three_d::fcc_coords_t &coord) noexcept
     {
         auto result = coord;
         if (coord.z > 0 || coord.z < other.sublattices_sizes[coord.w].z - 1)
@@ -51,9 +51,9 @@ namespace qss::nanostructures
     }
     template <ThreeD_Lattice lattice_t>
     requires std::is_same_v<typename lattice_t::coords_t, qss::lattices::three_d::fcc_coords_t>
-        std::optional<qss::lattices::three_d::fcc_coords_t>
-        get_closest_neigbour_from_lower_film(const film<lattice_t> &other,
-                                             const qss::lattices::three_d::fcc_coords_t &coord)
+    [[nodiscard]] std::optional<qss::lattices::three_d::fcc_coords_t>
+    get_closest_neigbour_from_lower_film(const film<lattice_t> &other,
+                                         const qss::lattices::three_d::fcc_coords_t &coord) noexcept
     {
         auto result = coord;
         if (coord.z > 0 || coord.z < other.sublattices_sizes[coord.w].z - 1)
@@ -91,8 +91,17 @@ namespace qss::nanostructures
             typename film_t::coords_t film_coord;
         };
 
+        [[nodiscard]] coords_t get(const coords_t &coord) const
+        {
+            if (coord.idx >= films.size())
+            {
+                throw std::out_of_range("coord.idx out of range : " + std::to_string(coord.idx) + " >= " + std::to_string(films.size()));
+            }
+            return films[coord.idx].get(coord.film_coord);
+        }
+
         template <typename random_t = qss::random::mersenne::random_t<>>
-        coords_t get_random_coord() const
+        coords_t get_random_coord() const noexcept
         {
             using size_type = typename container_t::size_type;
             static auto rand = random_t{qss::random::get_seed()};
@@ -110,7 +119,7 @@ namespace qss::nanostructures
               magns{calculate_magn(film)},
               energies{0.0} {};
 
-        void add(const film_t &film, double J_interlayer)
+        void add_film(const film_t &film, double J_interlayer)
         {
             check_sizes(film.sizes);
             films.push_back(film);
@@ -118,7 +127,7 @@ namespace qss::nanostructures
             energies.push_back(0.0);
             J_interlayers.push_back(J_interlayer);
         }
-        void add(film_t &&film, double J_interlayer)
+        void add_film(film_t &&film, double J_interlayer)
         {
             check_sizes(film.sizes);
             films.push_back(std::move(film));
@@ -126,7 +135,7 @@ namespace qss::nanostructures
             energies.push_back(0.0);
             J_interlayers.push_back(J_interlayer);
         }
-        film_t pop()
+        film_t &pop_film() noexcept
         {
             film_t result = films.back();
             films.pop_back();
@@ -141,8 +150,8 @@ namespace qss::nanostructures
         }
 
     private:
-        typename film_t::value_t::magn_t
-        get_sum_of_closest_neighbours(const coords_t &central_) const
+        [[nodiscard]] typename film_t::value_t::magn_t
+        get_sum_of_closest_neighbours(const coords_t &central_) const noexcept
         {
             const auto idx = central_.idx;
             const auto central = central_.film_coord;
@@ -224,7 +233,7 @@ namespace qss::nanostructures
                                            const typename film_t::value_t &spin_new) -> double
                     {
                         return scalar_multiply(sum, spin_old - spin_new);
-                    })
+                    }) noexcept 
         {
             for (auto idx = 0u; idx < films.size(); ++idx)
             {
