@@ -2,6 +2,7 @@
 #define BASE_LATTICE_HPP_INCLUDED
 
 #include <concepts>
+#include <type_traits>
 #include <vector>
 
 namespace qss::lattices
@@ -46,6 +47,18 @@ namespace qss::lattices
             } -> std::convertible_to<typename T::coords_t>;
     };
 
+    template <typename old_spin_t,
+              template <typename = old_spin_t> class lattice_t,
+              typename spin_t>
+    [[nodiscard]] constexpr lattice_t<spin_t> copy_structure(const lattice_t<old_spin_t> &original) noexcept
+    {
+        if constexpr (std::is_same_v<old_spin_t, spin_t>)
+        {
+            return original;
+        }
+
+        return lattice_t<spin_t>{original.sizes};
+    }
 }
 
 #endif

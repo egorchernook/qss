@@ -2,6 +2,7 @@
 #define FCC_HPP_INCLUDED
 
 #include <vector>
+#include <array>
 #include <stdexcept>
 #include <utility>
 #include <algorithm>

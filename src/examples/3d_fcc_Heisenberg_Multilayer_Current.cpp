@@ -5,6 +5,7 @@
 
 #include "../algorithms/Metropolis.hpp"
 #include "../models/heisenberg.hpp"
+#include "../models/electron_dencity.hpp"
 #include "../lattices/3d/fcc.hpp"
 #include "../lattices/3d/3d.hpp"
 #include "../lattices/borders_conditions.hpp"
@@ -21,12 +22,20 @@ int main()
     using qss::nanostructures::film;
     using qss::nanostructures::multilayer;
     using qss::nanostructures::multilayer_system;
+    using ed_t = qss::models::electron_dencity;
+    using electron_dencity_t = qss::lattices::three_d::fcc<ed_t>;
 
     constexpr static sizes_t sizes{64, 64, 3};
     multilayer_system<multilayer<lattice_t>> system{
         multilayer{{film<lattice_t>{lattice_t{spin_t{1.0, 0.0, 0.0}, sizes}, 1.0},
                     film<lattice_t>{lattice_t{spin_t{-1.0, 0.0, 0.0}, sizes}, 1.0}},
                    {-0.1}}};
+    multilayer n_up{{film<electron_dencity_t>{electron_dencity_t{ed_t{0.0}, sizes}, 1.0},
+                     film<electron_dencity_t>{electron_dencity_t{ed_t{0.0}, sizes}, 1.0}},
+                    {-0.1}};
+    multilayer n_down{{film<electron_dencity_t>{electron_dencity_t{ed_t{0.0}, sizes}, 1.0},
+                       film<electron_dencity_t>{electron_dencity_t{ed_t{0.0}, sizes}, 1.0}},
+                      {-0.1}};
 
     constexpr static std::uint32_t mcs_amount = 2'000;
     constexpr static double Delta = 0.665;
@@ -57,5 +66,6 @@ int main()
     }
     out_magn.flush();
     out_magn.close();
+
     return 0;
 }
