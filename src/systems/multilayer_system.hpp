@@ -73,6 +73,18 @@ namespace qss::nanostructures
         }
     };
 
+    template <typename spin_t,
+              typename old_spin_t,
+              template <typename = old_spin_t> class lattice_t>
+    [[nodiscard]] constexpr multilayer_system<multilayer<lattice_t<spin_t>>>
+    copy_structure(const multilayer_system<multilayer<lattice_t<old_spin_t>>> &original) noexcept
+    {
+        if constexpr (std::is_same_v<old_spin_t, spin_t>)
+        {
+            return original;
+        }
+        return {copy_structure<spin_t>(original)};
+    }
 }
 
 #endif

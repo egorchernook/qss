@@ -29,8 +29,10 @@ int main()
     using spin_t = qss::models::heisenberg::spin;
     using lattice_t = qss::lattices::three_d::fcc<spin_t>;
     using sizes_t = qss::lattices::three_d::sizes_t;
-    using periodic = qss::border_conditions::periodic<typename lattice_t::coords_t::size_type, typename sizes_t::size_type>;;
-    using sharp = qss::border_conditions::sharp<typename lattice_t::coords_t::size_type, typename sizes_t::size_type>;; 
+    using periodic = qss::borders_conditions::periodic<typename lattice_t::coords_t::size_type,
+                                                       typename sizes_t::size_type>;
+    using sharp = qss::borders_conditions::sharp<typename lattice_t::coords_t::size_type,
+                                                 typename sizes_t::size_type>;
 
     constexpr static sizes_t sizes{16, 16, 3};
     lattice_t lattice{spin_t{1.0, 0.0, 0.0}, sizes};
@@ -48,9 +50,9 @@ int main()
             qss::get_sum_of_closest_neighbours(
                 lattice_,
                 central,
-                qss::border_conditions::use_border_conditions<periodic, periodic, sharp>);
+                qss::borders_conditions::use_border_conditions<periodic, periodic, sharp>);
 
-        return scalar_multiply(sum ,(lattice_.get(central) - new_spin));
+        return scalar_multiply(sum, (lattice_.get(central) - new_spin));
     };
 
     std::ofstream output{"m.txt"};
@@ -65,7 +67,7 @@ int main()
                 const auto absl = abs(magn);
                 output << mcs << "\t"
                        << T << "\t"
-                       << absl << "\t" 
+                       << absl << "\t"
                        << magn << "\t"
                        << "\n";
             }

@@ -14,28 +14,28 @@ namespace qss::models::heisenberg
         double y = 0.0;
         double z = 0.0;
 
-        magn &operator+=(const magn &rhs)
+        magn &operator+=(const magn &rhs) noexcept
         {
             x += rhs.x;
             y += rhs.y;
             z += rhs.z;
             return *this;
         }
-        magn &operator-=(const magn &rhs)
+        magn &operator-=(const magn &rhs) noexcept
         {
             x -= rhs.x;
             y -= rhs.y;
             z -= rhs.z;
             return *this;
         }
-        magn &operator*=(const double &rhs)
+        magn &operator*=(const double &rhs) noexcept
         {
             x *= rhs;
             y *= rhs;
             z *= rhs;
             return *this;
         }
-        magn &operator/=(const double &rhs)
+        magn &operator/=(const double &rhs) noexcept
         {
             x /= rhs;
             y /= rhs;
@@ -66,13 +66,13 @@ namespace qss::models::heisenberg
             return result;
         }
 
-        operator magn() const
+        operator magn_t() const noexcept
         {
-            return magn{x, y, z};
+            return magn_t{x, y, z};
         }
     };
 
-    inline magn operator+(const spin &lhs, const spin &rhs)
+    inline magn operator+(const spin &lhs, const spin &rhs) noexcept
     {
         magn result{};
         result.x = lhs.x + rhs.x;
@@ -80,7 +80,7 @@ namespace qss::models::heisenberg
         result.z = lhs.z + rhs.z;
         return result;
     }
-    inline magn operator+(const magn &lhs, const magn &rhs)
+    inline magn operator+(const magn &lhs, const magn &rhs) noexcept
     {
         magn result{};
         result.x = lhs.x + rhs.x;
@@ -88,7 +88,7 @@ namespace qss::models::heisenberg
         result.z = lhs.z + rhs.z;
         return result;
     }
-    inline magn operator-(const spin &lhs, const spin &rhs)
+    inline magn operator-(const spin &lhs, const spin &rhs) noexcept
     {
         magn result{};
         result.x = lhs.x - rhs.x;
@@ -96,7 +96,7 @@ namespace qss::models::heisenberg
         result.z = lhs.z - rhs.z;
         return result;
     }
-    inline magn operator-(const magn &lhs, const magn &rhs)
+    inline magn operator-(const magn &lhs, const magn &rhs) noexcept
     {
         magn result{};
         result.x = lhs.x - rhs.x;
@@ -104,7 +104,7 @@ namespace qss::models::heisenberg
         result.z = lhs.z - rhs.z;
         return result;
     }
-    inline double scalar_multiply(const spin &lhs, const spin &rhs)
+    inline double scalar_multiply(const spin &lhs, const spin &rhs) noexcept
     {
         double sum = 0.0;
         sum += lhs.x * rhs.x;
@@ -112,7 +112,7 @@ namespace qss::models::heisenberg
         sum += lhs.z * rhs.z;
         return sum;
     }
-    inline double scalar_multiply(const magn &lhs, const magn &rhs)
+    inline double scalar_multiply(const magn &lhs, const magn &rhs) noexcept
     {
         double sum = 0.0;
         sum += lhs.x * rhs.x;
@@ -120,7 +120,7 @@ namespace qss::models::heisenberg
         sum += lhs.z * rhs.z;
         return sum;
     }
-    inline magn operator*(const double &lhs, const spin &rhs)
+    inline magn operator*(const double &lhs, const spin &rhs) noexcept
     {
         magn result;
         result.x = lhs * rhs.x;
@@ -128,7 +128,7 @@ namespace qss::models::heisenberg
         result.z = lhs * rhs.z;
         return (result);
     }
-    inline magn operator*(const double &lhs, const magn &rhs)
+    inline magn operator*(const double &lhs, const magn &rhs) noexcept
     {
         magn result;
         result.x = lhs * rhs.x;
@@ -136,15 +136,15 @@ namespace qss::models::heisenberg
         result.z = lhs * rhs.z;
         return (result);
     }
-    inline magn operator*(const spin &lhs, const double &rhs)
+    inline magn operator*(const spin &lhs, const double &rhs) noexcept
     {
         return (rhs * lhs);
     }
-    inline magn operator*(const magn &lhs, const double &rhs)
+    inline magn operator*(const magn &lhs, const double &rhs) noexcept
     {
         return (rhs * lhs);
     }
-    inline magn operator/(const spin &lhs, const double &rhs)
+    inline magn operator/(const spin &lhs, const double &rhs) noexcept
     {
         magn result{};
         result.x = lhs.x / rhs;
@@ -152,7 +152,7 @@ namespace qss::models::heisenberg
         result.z = lhs.z / rhs;
         return result;
     }
-    inline magn operator/(const magn &lhs, const double &rhs)
+    inline magn operator/(const magn &lhs, const double &rhs) noexcept
     {
         magn result{};
         result.x = lhs.x / rhs;
@@ -160,27 +160,27 @@ namespace qss::models::heisenberg
         result.z = lhs.z / rhs;
         return result;
     }
-    inline std::ostream &operator<<(std::ostream &out, const spin &data)
+    inline std::ostream &operator<<(std::ostream &out, const spin &data) noexcept
     {
         out << "( " << data.x << " , " << data.y << " , " << data.z << " )";
         return out;
     }
-    inline std::istream &operator>>(std::istream &in, spin &data)
+    inline std::istream &operator>>(std::istream &in, spin &data) noexcept
     {
         in >> data.x >> data.y >> data.z;
         return in;
     }
-    inline std::ostream &operator<<(std::ostream &out, const magn &data)
+    inline std::ostream &operator<<(std::ostream &out, const magn &data) noexcept
     {
         out << data.x << "\t" << data.y << "\t" << data.z;
         return out;
     }
-    inline std::istream &operator>>(std::istream &in, magn &data)
+    inline std::istream &operator>>(std::istream &in, magn &data) noexcept
     {
         in >> data.x >> data.y >> data.z;
         return in;
     }
-    inline double abs(const magn &val)
+    inline double abs(const magn &val) noexcept
     {
         return std::sqrt(val.x * val.x + val.y * val.y + val.z * val.z);
     }

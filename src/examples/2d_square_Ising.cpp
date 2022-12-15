@@ -29,7 +29,8 @@ int main()
     using spin_t = qss::models::ising::spin;
     using lattice_t = qss::lattices::two_d::square<spin_t>;
     using sizes_t = qss::lattices::two_d::sizes_t;
-    using conds = qss::border_conditions::periodic<typename lattice_t::coords_t::size_type, typename sizes_t::size_type>;
+    using conds = qss::borders_conditions::periodic<typename lattice_t::coords_t::size_type,
+                                                    typename sizes_t::size_type>;
 
     constexpr static sizes_t sizes{64, 64};
     lattice_t lattice{spin_t{1}, sizes};
@@ -47,7 +48,7 @@ int main()
             qss::get_sum_of_closest_neighbours(
                 lattice_,
                 central,
-                qss::border_conditions::use_border_conditions<conds, conds>);
+                qss::borders_conditions::use_border_conditions<conds, conds>);
 
         return sum * (lattice_.get(central) - new_spin);
     };

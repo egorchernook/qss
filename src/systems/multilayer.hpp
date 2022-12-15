@@ -21,6 +21,7 @@
 #include "../random/random.hpp"
 #include "../random/mersenne.hpp"
 #include "film.hpp"
+
 namespace qss::nanostructures
 {
 
@@ -53,7 +54,7 @@ namespace qss::nanostructures
     public:
         using film_t = film<lattice_t>;
         using coords_t = multilayer_coords_t<lattice_t>;
-        [[nodiscard]] coords_t get(const coords_t &coord) const
+        [[nodiscard]] typename lattice_t::value_t get(const coords_t &coord) const
         {
             if (coord.idx >= this->size())
             {
@@ -64,9 +65,9 @@ namespace qss::nanostructures
         template <typename random_t = qss::random::mersenne::random_t<>>
         multilayer_coords_t<lattice_t> get_random_coord() const noexcept
         {
-            using size_type = typename multilayer_coords_t<lattice_t>::size_type;
+            using size_t = typename multilayer_coords_t<lattice_t>::size_type;
             static auto rand = random_t{qss::random::get_seed()};
-            const size_type idx = static_cast<size_type>(rand(0, this->size()));
+            const size_t idx = static_cast<size_t>(rand(0, static_cast<size_t>(this->size())));
             const auto coord = this->at(idx).choose_random_node();
             return {idx, coord};
         }
@@ -83,6 +84,15 @@ namespace qss::nanostructures
         using container_t::operator[];
         using container_t::at;
 
+        [[nodiscard]] constexpr multilayer(container_t &&films,
+                                           std::vector<double> &&J_interlayers_)
+            : container_t{films}, J_interlayers{J_interlayers_}
+        {
+            if (J_interlayers.size() != this->size() - 1)
+            {
+                throw std::logic_error("number of interlayer exchange integrals must be number of films - 1 : " + std::to_string(J_interlayers.size()) + " != " + std::to_string(this->size() - 1));
+            }
+        }
         [[nodiscard]] constexpr multilayer(std::initializer_list<film_t> list,
                                            std::vector<double> &&J_interlayers_)
         {
@@ -116,7 +126,7 @@ namespace qss::nanostructures
             auto borders_conditions = [](const typename film_t::coords_t &coord_,
                                          const typename film_t::sizes_t &sizes)
             {
-                return qss::border_conditions::use_border_conditions<
+                return qss::borders_conditions::use_border_conditions<
                     typename film_t::xy_border_condition,
                     typename film_t::xy_border_condition,
                     typename film_t::z_border_condition>(coord_, sizes);
@@ -159,12 +169,23 @@ namespace qss::nanostructures
             }
             return sum;
         }
+
+        void fill(const typename film_t::value_t &value) noexcept
+        {
+            for (auto &film : *this)
+            {
+                for (auto &elem : film)
+                {
+                    elem = value;
+                }
+            }
+        }
     };
 
-    template <typename old_spin_t,
-              template <typename = old_spin_t> class lattice_t,
-              typename spin_t>
-    requires ThreeD_Lattice<lattice_t<old_spin_t>>
+    template <typename spin_t,
+              typename old_spin_t,
+              template <typename = old_spin_t> class lattice_t>
+        requires ThreeD_Lattice<lattice_t<old_spin_t>>
     [[nodiscard]] constexpr multilayer<lattice_t<spin_t>>
     copy_structure(const multilayer<lattice_t<old_spin_t>> &original) noexcept
     {
@@ -172,9 +193,14 @@ namespace qss::nanostructures
         {
             return original;
         }
+        using multilayer_t = multilayer<lattice_t<old_spin_t>>;
+        std::vector<typename multilayer_t::template film_t<lattice_t<spin_t>>> films{};
         for (auto &film : original.get_films())
         {
+            films.push_back(copy_structure<spin_t>(film));
         }
+        auto Js = original.get_J_interlayers();
+        return {films, Js};
     }
 }
 

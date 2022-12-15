@@ -7,6 +7,7 @@
 #include <utility>
 #include <algorithm>
 #include <cassert>
+#include <optional>
 
 #include "3d.hpp"
 #include "../base_lattice.hpp"
@@ -15,6 +16,7 @@
 
 namespace qss::lattices::three_d
 {
+    struct fcc_coords_pattern_t;
     /*
      * реализует координаты на ГЦК решётке
      * {w} = 0 -- базовая решётка
@@ -29,7 +31,49 @@ namespace qss::lattices::three_d
         size_type x = 0;    //
         size_type y = 0;    // координаты в простой подрешётке
         size_type z = 0;    //
+
+        using pattern_t = fcc_coords_pattern_t;
     };
+
+    struct fcc_coords_pattern_t
+    {
+        std::uint8_t w;
+        std::optional<typename fcc_coords_t::size_type> x;
+        std::optional<typename fcc_coords_t::size_type> y;
+        std::optional<typename fcc_coords_t::size_type> z;
+
+        fcc_coords_t get_coord() const noexcept
+        {
+            fcc_coords_t result{};
+            result.w = w;
+            if (x)
+            {
+                result.x = x.value();
+            }
+            if (y)
+            {
+                result.y = y.value();
+            }
+            if (z)
+            {
+                result.z = z.value();
+            }
+            return result;
+        }
+    };
+
+    [[nodiscard]] inline std::vector<fcc_coords_pattern_t> get_plane_XY(unsigned int z) noexcept
+    {
+        //using size_type = fcc_coords_t::size_type;
+        if (z % 2 == 0)
+        {
+            return {{0, {}, {}, {z / 2}}, {1, {}, {}, {z / 2}}};
+        }
+        else
+        {
+            return {{1, {}, {}, {z / 2}}, {2, {}, {}, {z / 2}}};
+        }
+    }
 
     [[nodiscard]] inline std::vector<fcc_coords_t> get_closest_neighbours(const fcc_coords_t &coords)
     {

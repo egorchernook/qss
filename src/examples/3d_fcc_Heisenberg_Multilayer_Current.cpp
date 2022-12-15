@@ -5,7 +5,6 @@
 
 #include "../algorithms/Metropolis.hpp"
 #include "../models/heisenberg.hpp"
-#include "../models/electron_dencity.hpp"
 #include "../lattices/3d/fcc.hpp"
 #include "../lattices/3d/3d.hpp"
 #include "../lattices/borders_conditions.hpp"
@@ -13,6 +12,8 @@
 #include "../utility/functions.hpp"
 #include "../systems/multilayer.hpp"
 #include "../systems/multilayer_system.hpp"
+#include "../algorithms/spin_transport.hpp"
+#include "../models/electron_dencity.hpp"
 
 int main()
 {
@@ -37,20 +38,42 @@ int main()
                        film<electron_dencity_t>{electron_dencity_t{ed_t{0.0}, sizes}, 1.0}},
                       {-0.1}};
 
-    constexpr static std::uint32_t mcs_amount = 2'000;
+    auto sys = qss::algorithms::spin_transport::prepare_proxy_structure<'x'>(system, n_up, n_down);
+
+    constexpr static std::uint32_t mcs_amount = 5'000;
     constexpr static double Delta = 0.665;
     system.T = 0.5;
     std::ofstream out_magn{"m.txt"};
+    std::ofstream out_j{"j.txt"};
     for (std::size_t mcs = 0; mcs <= mcs_amount; ++mcs)
     {
         if (mcs % 10 == 0)
         {
             std::cout << mcs << "\n";
         }
+        if (mcs >= 2000)
+        {
+            const auto temp_magn1 = abs(system.magns[0]);
+            const auto temp_magn2 = -abs(system.magns[1]);
+            if (mcs == 2000)
+            {
+                n_up[0].fill(ed_t{0.5 * (1.0 + temp_magn1)});
+                n_up[1].fill(ed_t{0.5 * (1.0 + temp_magn1)});
+                n_down[0].fill(ed_t{0.5 * (1.0 - temp_magn2)});
+                n_down[1].fill(ed_t{0.5 * (1.0 - temp_magn2)});
+            }
+            n_up[0].fill_plane(0, ed_t{0.5 * (1.0 + temp_magn1)});
+            n_down[0].fill_plane(0, ed_t{0.5 * (1.0 - temp_magn2)});
+            const auto [j_up, j_down] = qss::algorithms::spin_transport::perform(sys);
+            out_j << mcs << "\t"
+                  << j_up << "\t"
+                  << j_down << std::endl;
+        }
+
         system.evolve([](const typename spin_t::magn_t &sum,
-                            const spin_t &spin_old,
-                            const spin_t &spin_new) -> double
-                         {
+                         const spin_t &spin_old,
+                         const spin_t &spin_new) -> double
+                      {
                                 auto diff = spin_old - spin_new;
                                 diff.z *= (1.0 - Delta);
                                 return scalar_multiply(sum, diff); });
@@ -65,7 +88,9 @@ int main()
                  << magn2 << std::endl;
     }
     out_magn.flush();
+    out_j.flush();
     out_magn.close();
+    out_j.close();
 
     return 0;
 }

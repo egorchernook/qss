@@ -28,10 +28,17 @@ namespace qss::lattices
         {
             return this->size();
         }
+        constexpr void fill(const value_t &value) noexcept
+        {
+            for (auto &elem : *this)
+            {
+                elem = value;
+            }
+        }
 
         virtual ~base_lattice_t() noexcept {};
         [[nodiscard]] virtual value_t get(const coords_t &coord) const = 0;
-        virtual void set(const node_t &value, const coords_t &coords) = 0;
+        virtual void set(const value_t &value, const coords_t &coords) = 0;
 
     protected:
         virtual void bounds_check(const coords_t &coords) const = 0;
@@ -39,17 +46,17 @@ namespace qss::lattices
 
     template <typename T>
     concept Lattice = std::is_base_of_v<
-        base_lattice_t<typename T::value_t, typename T::coords_t>,
-        T> && requires(T obj)
-    {
-        {
-            obj.choose_random_node()
-            } -> std::convertible_to<typename T::coords_t>;
-    };
+                          base_lattice_t<typename T::value_t, typename T::coords_t>,
+                          T> &&
+                      requires(T obj) {
+                          {
+                              obj.choose_random_node()
+                              } -> std::convertible_to<typename T::coords_t>;
+                      };
 
-    template <typename old_spin_t,
-              template <typename = old_spin_t> class lattice_t,
-              typename spin_t>
+    template <typename spin_t,
+              typename old_spin_t,
+              template <typename = old_spin_t> class lattice_t>
     [[nodiscard]] constexpr lattice_t<spin_t> copy_structure(const lattice_t<old_spin_t> &original) noexcept
     {
         if constexpr (std::is_same_v<old_spin_t, spin_t>)

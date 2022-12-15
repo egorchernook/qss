@@ -17,22 +17,75 @@ namespace qss::nanostructures
     template <ThreeD_Lattice lattice_t>
     struct film final : public lattice_t
     {
-        using xy_border_condition = typename qss::border_conditions::periodic<
+        using xy_border_condition = typename qss::borders_conditions::periodic<
             typename lattice_t::coords_t::size_type,
             typename lattice_t::sizes_t::size_type>;
-        using z_border_condition = typename qss::border_conditions::sharp<
+        using z_border_condition = typename qss::borders_conditions::sharp<
             typename lattice_t::coords_t::size_type,
             typename lattice_t::sizes_t::size_type>;
         double J;
 
         film(const lattice_t &lattice, double J_ = 1.0) : lattice_t{lattice}, J{J_} {};
         film(lattice_t &&lattice, double J_ = 1.0) noexcept : lattice_t{std::move(lattice)}, J{J_} {};
+
+        typename lattice_t::sizes_t::size_type
+        get_last_z(const typename qss::lattices::three_d::fcc_coords_t &coord) const
+        {
+            using cast_t = typename lattice_t::sizes_t::size_type;
+            switch (coord.w)
+            {
+            case 0:
+                return static_cast<cast_t>(this->sizes.z / 2 + this->sizes.z % 2 - 1);
+                break;
+            case 1:
+                return static_cast<cast_t>(this->sizes.z / 2 + this->sizes.z % 2 - 1);
+                break;
+            case 2:
+                return static_cast<cast_t>(this->sizes.z / 2 - 1);
+                break;
+            case 3:
+                return static_cast<cast_t>(this->sizes.z / 2 - 1);
+                break;
+            default:
+                throw std::out_of_range("coord.w out of range : " + std::to_string(coord.w));
+                break;
+            }
+        }
+
+        void fill_plane(unsigned int z, const typename lattice_t::value_t &value)
+        {
+            const auto patterns = qss::lattices::three_d::get_plane_XY(z);
+
+            for (const auto &pattern : patterns)
+            {
+                auto coord = pattern.get_coord();
+                typename lattice_t::coords_t::size_type i{0};
+                typename lattice_t::coords_t::size_type j{0};
+                do
+                {
+                    coord.x = i++;
+                    coord.y = j++;
+                    const auto exists = qss::borders_conditions::use_border_conditions<z_border_condition,
+                                                                                       z_border_condition,
+                                                                                       z_border_condition>(coord,
+                                                                                                           this->sizes);
+                    if (exists)
+                    {
+                        this->set(value, coord);
+                    }
+                    else
+                    {
+                        break;
+                    }
+                } while (true);
+            }
+        }
     };
 
-    template <typename old_spin_t,
-              template <typename = old_spin_t> class lattice_t,
-              typename spin_t>
-    requires ThreeD_Lattice<lattice_t<old_spin_t>>
+    template <typename spin_t,
+              typename old_spin_t,
+              template <typename = old_spin_t> class lattice_t>
+        requires ThreeD_Lattice<lattice_t<old_spin_t>>
     [[nodiscard]] constexpr film<lattice_t<spin_t>>
     copy_structure(const film<lattice_t<old_spin_t>> &original) noexcept
     {
@@ -47,7 +100,7 @@ namespace qss::nanostructures
     }
 
     template <ThreeD_Lattice lattice_t>
-    requires std::is_same_v<typename lattice_t::coords_t, qss::lattices::three_d::fcc_coords_t>
+        requires std::is_same_v<typename lattice_t::coords_t, qss::lattices::three_d::fcc_coords_t>
     [[nodiscard]] std::optional<qss::lattices::three_d::fcc_coords_t>
     get_closest_neigbour_from_upper_film(const film<lattice_t> &other,
                                          const qss::lattices::three_d::fcc_coords_t &coord) noexcept
@@ -61,7 +114,7 @@ namespace qss::nanostructures
         return result;
     }
     template <ThreeD_Lattice lattice_t>
-    requires std::is_same_v<typename lattice_t::coords_t, qss::lattices::three_d::fcc_coords_t>
+        requires std::is_same_v<typename lattice_t::coords_t, qss::lattices::three_d::fcc_coords_t>
     [[nodiscard]] std::optional<qss::lattices::three_d::fcc_coords_t>
     get_closest_neigbour_from_lower_film(const film<lattice_t> &other,
                                          const qss::lattices::three_d::fcc_coords_t &coord) noexcept

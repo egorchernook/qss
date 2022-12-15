@@ -28,58 +28,59 @@ namespace qss::models::ising
             return spin{static_cast<std::int8_t>(number)};
         }
 
-        operator magn() const
+        operator magn() const noexcept
         {
             return static_cast<magn>(value);
         }
     };
 
-    inline magn operator+(const spin &lhs, const spin &rhs)
+    inline magn operator+(const spin &lhs, const spin &rhs) noexcept
     {
         magn result = lhs.value;
         result += rhs.value;
         return result;
     }
-    inline magn operator-(const spin &lhs, const spin &rhs)
+    inline magn operator-(const spin &lhs, const spin &rhs) noexcept
     {
         magn result = lhs.value;
         result -= rhs.value;
         return result;
     }
-    inline double scalar_multiply(const spin &lhs, const spin &rhs)
+    inline double scalar_multiply(const spin &lhs, const spin &rhs) noexcept
     {
         magn result = lhs.value;
         result *= rhs.value;
         return result;
     }
-    inline magn operator*(const int &lhs, const spin &rhs)
+    inline magn operator*(const int &lhs, const spin &rhs) noexcept
     {
         magn result = rhs.value;
         result *= lhs;
         return result;
     }
-    inline magn operator*(const double &lhs, const spin &rhs)
+    inline magn operator*(const double &lhs, const spin &rhs) noexcept
     {
         magn result = rhs.value;
         result *= lhs;
         return result;
     }
-    inline magn operator*(const spin &lhs, const double &rhs)
+    inline magn operator*(const spin &lhs, const double &rhs) noexcept
     {
         return (rhs * lhs);
     }
 
-    inline std::ostream &operator<<(std::ostream &out, const spin &data)
+    inline std::ostream &operator<<(std::ostream &out, const spin &data) noexcept
     {
         out << "( " << data.value << " )";
         return out;
     }
-    inline std::istream &operator>>(std::istream &in, spin &data)
+    inline std::istream &operator>>(std::istream &in, spin &data) noexcept
     {
         in >> data.value;
         return in;
     }
-    inline double abs(const magn& val){
+    inline double abs(const magn &val) noexcept
+    {
         return std::abs(val);
     }
 }
