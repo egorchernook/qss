@@ -40,9 +40,10 @@ int main()
 
     auto sys = qss::algorithms::spin_transport::prepare_proxy_structure<'x'>(system, n_up, n_down);
 
-    constexpr static std::uint32_t mcs_amount = 5'000;
+    constexpr static std::uint32_t mcs_amount = 10'000;
     constexpr static double Delta = 0.665;
     system.T = 0.5;
+    sys.T = system.T;
     std::ofstream out_magn{"m.txt"};
     std::ofstream out_j{"j.txt"};
     for (std::size_t mcs = 0; mcs <= mcs_amount; ++mcs)
@@ -51,6 +52,8 @@ int main()
         {
             std::cout << mcs << "\n";
         }
+        double j_up_all = 0.0;
+        double j_down_all = 0.0;
         if (mcs >= 2000)
         {
             const auto temp_magn1 = abs(system.magns[0]);
@@ -61,13 +64,17 @@ int main()
                 n_up[1].fill(ed_t{0.5 * (1.0 + temp_magn1)});
                 n_down[0].fill(ed_t{0.5 * (1.0 - temp_magn2)});
                 n_down[1].fill(ed_t{0.5 * (1.0 - temp_magn2)});
+                system.T = 1.0;
+                sys.T = system.T;
             }
             n_up[0].fill_plane(0, ed_t{0.5 * (1.0 + temp_magn1)});
             n_down[0].fill_plane(0, ed_t{0.5 * (1.0 - temp_magn2)});
             const auto [j_up, j_down] = qss::algorithms::spin_transport::perform(sys);
+            j_up_all += j_up / (sizes.x * sizes.y);
+            j_down_all += j_down / (sizes.x * sizes.y);
             out_j << mcs << "\t"
-                  << j_up << "\t"
-                  << j_down << std::endl;
+                  << j_up_all << "\t"
+                  << j_down_all << std::endl;
         }
 
         system.evolve([](const typename spin_t::magn_t &sum,
@@ -75,6 +82,7 @@ int main()
                          const spin_t &spin_new) -> double
                       {
                                 auto diff = spin_old - spin_new;
+                                diff.y *= 0.8;
                                 diff.z *= (1.0 - Delta);
                                 return scalar_multiply(sum, diff); });
         const auto magn1 = system.magns[0];

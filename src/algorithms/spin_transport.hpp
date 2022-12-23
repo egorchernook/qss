@@ -2,8 +2,8 @@
 #define SPIN_TRANSPORT_HPP_INCLUDED
 
 #include <concepts>
-#include <functional>
 #include <stdexcept>
+#include <numeric>
 
 #include "../models/heisenberg.hpp"
 #include "../systems/multilayer_system.hpp"
@@ -15,21 +15,72 @@
 
 namespace qss::algorithms::spin_transport
 {
-    struct proxy_spin
+    // используется ТОЛЬКО для создания proxy структуры, для расчёта тока
+    class proxy_spin
     {
+        double *value = nullptr;
+        typename qss::models::electron_dencity *up = nullptr;
+        typename qss::models::electron_dencity *down = nullptr;
+
+    public:
+        proxy_spin() noexcept = default;
+        proxy_spin(const proxy_spin &) noexcept = default;
+        proxy_spin(proxy_spin &&) noexcept = default;
+        ~proxy_spin() noexcept = default;
+        proxy_spin &operator=(const proxy_spin &other) noexcept
+        {
+            value = other.value;
+            up = other.up;
+            down = other.down;
+            return *this;
+        }
+
         using magn_t = double;
-        std::reference_wrapper<double> value;
-        std::reference_wrapper<typename qss::models::electron_dencity> up;
-        std::reference_wrapper<typename qss::models::electron_dencity> down;
+
+        double get_val() const noexcept
+        {
+            return *value;
+        }
+        typename qss::models::electron_dencity get_up() const noexcept
+        {
+            return *up;
+        }
+        typename qss::models::electron_dencity get_down() const noexcept
+        {
+            return *down;
+        }
+        void set_val(double value_) noexcept
+        {
+            *value = value_;
+        }
+        void set_up(typename qss::models::electron_dencity value_) noexcept
+        {
+            *up = value_;
+        }
+        void set_down(typename qss::models::electron_dencity value_) noexcept
+        {
+            *down = value_;
+        }
 
         constexpr proxy_spin(double &value_,
                              typename qss::models::electron_dencity &up_,
                              typename qss::models::electron_dencity &down_) noexcept
-            : value{std::ref(value_)}, up{std::ref(up_)}, down{std::ref(down_)} {}
+            : value{&value_}, up{&up_}, down{&down_} {}
 
         operator magn_t() const
         {
-            return value * (typename qss::models::electron_dencity::magn_t(up.get()) - typename qss::models::electron_dencity::magn_t(down.get()));
+            if (value == nullptr || up == nullptr || down == nullptr)
+            {
+                return 0.0;
+            }
+            if (*value > 0.0)
+            {
+                return typename qss::models::electron_dencity::magn_t(*up) - typename qss::models::electron_dencity::magn_t(*down);
+            }
+            else
+            {
+                return -typename qss::models::electron_dencity::magn_t(*up) + typename qss::models::electron_dencity::magn_t(*down);
+            }
         }
     };
 
@@ -73,6 +124,11 @@ namespace qss::algorithms::spin_transport
             qss::nanostructures::multilayer<
                 lattice_t<spin_t>>>;
 
+    /*  proxy структура ТОЛЬКО для использования в функции spin_transport
+     *  содержит указатели на нужные значения спина, и электронных плотностей
+     *  spin_component_name принимает значения x, y или z,
+     *  чтобы указать какую составляющую спина использовать далее
+     **/
     template <char spin_component_name,
               typename old_spin_t,
               template <typename = old_spin_t> class film_t>
@@ -133,16 +189,35 @@ namespace qss::algorithms::spin_transport
 
     template <template <typename> class film_t,
               typename random_t = qss::random::mersenne::random_t<>>
-    result_t perform(const nanostructure_type<film_t, proxy_spin> &system) noexcept
+    result_t perform(nanostructure_type<film_t, proxy_spin> &system) noexcept
     {
         result_t result{};
         const auto layers = system.nanostructure;
-        const auto amount = layers[layers.template get_random_coord<random_t>().idx].get_amount_of_nodes();
+        const auto amount = std::accumulate(layers.begin(), layers.end(),
+                                            layers.begin()->get_amount_of_nodes(),
+                                            []([[maybe_unused]] auto first, auto second)
+                                            {
+                                                return second.get_amount_of_nodes();
+                                            });
         for (auto i = 0u; i < amount; ++i)
         {
             const auto coord = layers.template get_random_coord<random_t>();
             const auto E1 = scalar_multiply(layers.get_sum_of_closest_neighbours(coord),
                                             layers.get(coord));
+
+            auto next_coord = coord;
+            auto next_film_coord = coord.film_coord;
+            if (next_film_coord.z == layers[coord.idx].get_last_z(coord.film_coord))
+            {
+                next_film_coord.z = 0;
+                next_coord = {static_cast<typename decltype(system.nanostructure)::coords_t::size_type>(coord.idx + 1),
+                              next_film_coord};
+            }
+            else
+            {
+                next_film_coord.z += 1;
+                next_coord = {coord.idx, next_film_coord};
+            }
             double E2{};
             if (coord.film_coord.z == layers[coord.idx].get_last_z(coord.film_coord))
             {
@@ -150,16 +225,24 @@ namespace qss::algorithms::spin_transport
             }
             else
             {
-                auto next_coord = coord.film_coord;
-                next_coord.z += 1;
+                const auto temp = layers.get(next_coord) + layers.get(coord) / layers.get(coord).get_val();
                 E2 = scalar_multiply(layers.get_sum_of_closest_neighbours(coord),
-                                     layers.get({coord.idx, next_coord}));
+                                     temp);
             }
             const auto delta_E = E2 - E1;
-            if (delta_E < 0.0)
+            static random_t rand{qss::random::get_seed()};
+            if (delta_E < 0.0 || rand() < std::exp(-delta_E / system.T))
             {
-                result.up += layers.get(coord).up.get();
-                result.down += layers.get(coord).down.get();
+                auto chosen = layers.get(coord);
+                result.up += layers.get(coord).get_up();
+                result.down += layers.get(coord).get_down();
+                if (next_coord.idx < layers.size())
+                {
+                    layers.get(next_coord).set_up(chosen.get_up());
+                    layers.get(next_coord).set_down(chosen.get_down());
+                }
+                chosen.set_up(typename qss::models::electron_dencity{0.0});
+                chosen.set_down(typename qss::models::electron_dencity{0.0});
             }
         }
         return result;

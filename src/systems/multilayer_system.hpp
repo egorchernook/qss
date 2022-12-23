@@ -83,7 +83,7 @@ namespace qss::nanostructures
         {
             return original;
         }
-        return {copy_structure<spin_t>(original)};
+        return {copy_structure<spin_t>(original.nanostructure)};
     }
 }
 

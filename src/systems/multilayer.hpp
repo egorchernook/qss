@@ -86,6 +86,15 @@ namespace qss::nanostructures
 
         [[nodiscard]] constexpr multilayer(container_t &&films,
                                            std::vector<double> &&J_interlayers_)
+            : container_t{std::move(films)}, J_interlayers{std::move(J_interlayers_)}
+        {
+            if (J_interlayers.size() != this->size() - 1)
+            {
+                throw std::logic_error("number of interlayer exchange integrals must be number of films - 1 : " + std::to_string(J_interlayers.size()) + " != " + std::to_string(this->size() - 1));
+            }
+        }
+        [[nodiscard]] constexpr multilayer(const container_t &films,
+                                           const std::vector<double> &J_interlayers_)
             : container_t{films}, J_interlayers{J_interlayers_}
         {
             if (J_interlayers.size() != this->size() - 1)
@@ -193,9 +202,8 @@ namespace qss::nanostructures
         {
             return original;
         }
-        using multilayer_t = multilayer<lattice_t<old_spin_t>>;
-        std::vector<typename multilayer_t::template film_t<lattice_t<spin_t>>> films{};
-        for (auto &film : original.get_films())
+        std::vector<film<lattice_t<spin_t>>> films{};
+        for (auto &film : original)
         {
             films.push_back(copy_structure<spin_t>(film));
         }

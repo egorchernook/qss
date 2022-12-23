@@ -17,6 +17,8 @@ namespace qss::nanostructures
     template <ThreeD_Lattice lattice_t>
     struct film final : public lattice_t
     {
+        using typename lattice_t::sizes_t;
+        using typename lattice_t::coords_t;
         using xy_border_condition = typename qss::borders_conditions::periodic<
             typename lattice_t::coords_t::size_type,
             typename lattice_t::sizes_t::size_type>;
@@ -95,7 +97,7 @@ namespace qss::nanostructures
         }
 
         return film<lattice_t<spin_t>>{
-            qss::lattices::copy_structure<spin_t>(original),
+            copy_structure<spin_t>(dynamic_cast<const lattice_t<old_spin_t>&>(original)),
             original.J};
     }
 
@@ -110,7 +112,7 @@ namespace qss::nanostructures
         {
             return {};
         }
-        result.z = other.sublattices_sizes[coord.w].z - 1;
+        result.z = 0;
         return result;
     }
     template <ThreeD_Lattice lattice_t>
@@ -124,7 +126,7 @@ namespace qss::nanostructures
         {
             return {};
         }
-        result.z = 0;
+        result.z = other.sublattices_sizes[coord.w].z - 1;
         return result;
     }
 }
