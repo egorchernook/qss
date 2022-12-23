@@ -38,14 +38,16 @@ namespace qss::nanostructures
             }
         }
 
+        /*
         using delta_h_t = auto(*)(const typename multilayer_t::film_t::value_t::magn_t &,
                                   const typename multilayer_t::film_t::value_t &,
                                   const typename multilayer_t::film_t::value_t &) -> double;
-
+        */
         /*
          * использует алгоритм Метрополиса
          * необходимо установить температуру, перед использованием
          **/
+        template<typename delta_h_t>
         void evolve(delta_h_t delta_h = [](const typename multilayer_t::film_t::value_t::magn_t &sum,
                                            const typename multilayer_t::film_t::value_t &spin_old,
                                            const typename multilayer_t::film_t::value_t &spin_new) -> double

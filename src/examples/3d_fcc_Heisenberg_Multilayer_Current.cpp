@@ -27,22 +27,25 @@ int main()
     using electron_dencity_t = qss::lattices::three_d::fcc<ed_t>;
 
     constexpr static sizes_t sizes{64, 64, 3};
+    constexpr static double J2 = -0.3;
+    constexpr static double T_0 = 0.67;
+    constexpr static double T_s = 0.95; 
     multilayer_system<multilayer<lattice_t>> system{
         multilayer{{film<lattice_t>{lattice_t{spin_t{1.0, 0.0, 0.0}, sizes}, 1.0},
                     film<lattice_t>{lattice_t{spin_t{-1.0, 0.0, 0.0}, sizes}, 1.0}},
-                   {-0.1}}};
+                   {J2}}};
     multilayer n_up{{film<electron_dencity_t>{electron_dencity_t{ed_t{0.0}, sizes}, 1.0},
                      film<electron_dencity_t>{electron_dencity_t{ed_t{0.0}, sizes}, 1.0}},
-                    {-0.1}};
+                    {J2}};
     multilayer n_down{{film<electron_dencity_t>{electron_dencity_t{ed_t{0.0}, sizes}, 1.0},
                        film<electron_dencity_t>{electron_dencity_t{ed_t{0.0}, sizes}, 1.0}},
-                      {-0.1}};
+                      {J2}};
 
     auto sys = qss::algorithms::spin_transport::prepare_proxy_structure<'x'>(system, n_up, n_down);
 
-    constexpr static std::uint32_t mcs_amount = 10'000;
+    constexpr static std::uint32_t mcs_amount = 3'000;
     constexpr static double Delta = 0.665;
-    system.T = 0.5;
+    system.T = T_0;
     sys.T = system.T;
     std::ofstream out_magn{"m.txt"};
     std::ofstream out_j{"j.txt"};
@@ -54,7 +57,7 @@ int main()
         }
         double j_up_all = 0.0;
         double j_down_all = 0.0;
-        if (mcs >= 2000)
+        if (mcs >= 1000)
         {
             const auto temp_magn1 = abs(system.magns[0]);
             const auto temp_magn2 = -abs(system.magns[1]);
@@ -64,7 +67,7 @@ int main()
                 n_up[1].fill(ed_t{0.5 * (1.0 + temp_magn1)});
                 n_down[0].fill(ed_t{0.5 * (1.0 - temp_magn2)});
                 n_down[1].fill(ed_t{0.5 * (1.0 - temp_magn2)});
-                system.T = 1.0;
+                system.T = T_s;
                 sys.T = system.T;
             }
             n_up[0].fill_plane(0, ed_t{0.5 * (1.0 + temp_magn1)});
@@ -81,10 +84,12 @@ int main()
                          const spin_t &spin_old,
                          const spin_t &spin_new) -> double
                       {
+                                auto sum_with_field = sum;
+                                sum_with_field.x -= 0.1;
                                 auto diff = spin_old - spin_new;
                                 diff.y *= 0.8;
                                 diff.z *= (1.0 - Delta);
-                                return scalar_multiply(sum, diff); });
+                                return scalar_multiply(sum_with_field, diff); });
         const auto magn1 = system.magns[0];
         const auto magn2 = system.magns[1];
 
