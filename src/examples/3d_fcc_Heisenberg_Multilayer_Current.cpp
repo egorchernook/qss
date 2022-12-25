@@ -84,12 +84,10 @@ int main()
                          const spin_t &spin_old,
                          const spin_t &spin_new) -> double
                       {
-                                auto sum_with_field = sum;
-                                sum_with_field.x -= 0.1;
                                 auto diff = spin_old - spin_new;
                                 diff.y *= 0.8;
                                 diff.z *= (1.0 - Delta);
-                                return scalar_multiply(sum_with_field, diff); });
+                                return scalar_multiply(sum, diff); });
         const auto magn1 = system.magns[0];
         const auto magn2 = system.magns[1];
 
