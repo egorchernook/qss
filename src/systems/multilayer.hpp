@@ -22,7 +22,7 @@
 #include "../random/mersenne.hpp"
 #include "film.hpp"
 
-namespace qss::nanostructures
+namespace qss::inline nanostructures
 {
 
     template <ThreeD_Lattice lattice_t>

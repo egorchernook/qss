@@ -15,12 +15,12 @@
 
 int main()
 {
-    using spin_t = qss::models::heisenberg::spin;
+    using spin_t = qss::heisenberg::spin;
     using lattice_t = qss::lattices::three_d::fcc<spin_t>;
     using sizes_t = qss::lattices::three_d::sizes_t;
-    using qss::nanostructures::film;
-    using qss::nanostructures::multilayer;
-    using qss::nanostructures::multilayer_system;
+    using qss::film;
+    using qss::multilayer;
+    using qss::multilayer_system;
 
     constexpr static sizes_t sizes{64, 64, 3};
     multilayer_system<multilayer<lattice_t>> system{

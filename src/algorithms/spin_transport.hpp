@@ -13,7 +13,7 @@
 #include "../random/mersenne.hpp"
 #include "../models/electron_dencity.hpp"
 
-namespace qss::algorithms::spin_transport
+namespace qss::inline algorithms::spin_transport
 {
     // используется ТОЛЬКО для создания proxy структуры, для расчёта тока
     class proxy_spin

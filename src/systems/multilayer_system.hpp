@@ -5,7 +5,7 @@
 
 #include "multilayer.hpp"
 
-namespace qss::nanostructures
+namespace qss::inline nanostructures
 {
     template <typename multilayer_t>
     struct multilayer_system

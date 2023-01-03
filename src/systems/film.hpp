@@ -9,7 +9,7 @@
 #include "../lattices/3d/fcc.hpp"
 #include "../lattices/borders_conditions.hpp"
 
-namespace qss::nanostructures
+namespace qss::inline nanostructures
 {
     template <typename lattice_t>
     concept ThreeD_Lattice = std::same_as<typename lattice_t::sizes_t, qss::lattices::three_d::sizes_t>;

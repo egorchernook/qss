@@ -8,7 +8,7 @@
 #include <cstdint>
 #include <cmath>
 
-namespace qss::models::ising
+namespace qss::inline models::ising
 {
     using magn = double;
     struct spin

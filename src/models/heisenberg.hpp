@@ -6,7 +6,7 @@
 #include "../random/random.hpp"
 #include "../random/mersenne.hpp"
 
-namespace qss::models::heisenberg
+namespace qss::inline models::heisenberg
 {
     struct magn
     {

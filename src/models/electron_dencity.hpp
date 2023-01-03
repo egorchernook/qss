@@ -3,7 +3,7 @@
 
 #include <iostream>
 
-namespace qss::models
+namespace qss::inline models
 {
     struct electron_dencity
     {

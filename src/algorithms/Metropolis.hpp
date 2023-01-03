@@ -6,7 +6,7 @@
 #include "../random/random.hpp"
 #include "../random/mersenne.hpp"
 
-namespace qss::algorithms::metropolis
+namespace qss::inline algorithms::metropolis
 {
     /*
      * Свободная процедура для прохождения одного шага Монте-Карло.

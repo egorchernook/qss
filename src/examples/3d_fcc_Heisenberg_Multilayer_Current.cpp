@@ -17,13 +17,13 @@
 
 int main()
 {
-    using spin_t = qss::models::heisenberg::spin;
+    using spin_t = qss::heisenberg::spin;
     using lattice_t = qss::lattices::three_d::fcc<spin_t>;
     using sizes_t = qss::lattices::three_d::sizes_t;
-    using qss::nanostructures::film;
-    using qss::nanostructures::multilayer;
-    using qss::nanostructures::multilayer_system;
-    using ed_t = qss::models::electron_dencity;
+    using qss::film;
+    using qss::multilayer;
+    using qss::multilayer_system;
+    using ed_t = qss::electron_dencity;
     using electron_dencity_t = qss::lattices::three_d::fcc<ed_t>;
 
     constexpr static sizes_t sizes{64, 64, 3};
@@ -41,7 +41,7 @@ int main()
                        film<electron_dencity_t>{electron_dencity_t{ed_t{0.0}, sizes}, 1.0}},
                       {J2}};
 
-    auto sys = qss::algorithms::spin_transport::prepare_proxy_structure<'x'>(system, n_up, n_down);
+    auto sys = qss::spin_transport::prepare_proxy_structure<'x'>(system, n_up, n_down);
 
     constexpr static std::uint32_t mcs_amount = 3'000;
     constexpr static double Delta = 0.665;
@@ -72,7 +72,7 @@ int main()
             }
             n_up[0].fill_plane(0, ed_t{0.5 * (1.0 + temp_magn1)});
             n_down[0].fill_plane(0, ed_t{0.5 * (1.0 - temp_magn2)});
-            const auto [j_up, j_down] = qss::algorithms::spin_transport::perform(sys);
+            const auto [j_up, j_down] = qss::spin_transport::perform(sys);
             j_up_all += j_up / (sizes.x * sizes.y);
             j_down_all += j_down / (sizes.x * sizes.y);
             out_j << mcs << "\t"

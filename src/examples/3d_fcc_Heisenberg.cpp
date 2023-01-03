@@ -26,7 +26,7 @@ std::vector<double> get_temperatures(const double T_begin = 1.0,
 
 int main()
 {
-    using spin_t = qss::models::heisenberg::spin;
+    using spin_t = qss::heisenberg::spin;
     using lattice_t = qss::lattices::three_d::fcc<spin_t>;
     using sizes_t = qss::lattices::three_d::sizes_t;
     using periodic = qss::borders_conditions::periodic<typename lattice_t::coords_t::size_type,
@@ -71,7 +71,7 @@ int main()
                        << magn << "\t"
                        << "\n";
             }
-            qss::algorithms::metropolis::make_step(lattice, delta_energy_f, T);
+            qss::metropolis::make_step(lattice, delta_energy_f, T);
         }
     }
     output.flush();
