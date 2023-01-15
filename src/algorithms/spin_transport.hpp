@@ -131,14 +131,14 @@ namespace qss::inline algorithms::spin_transport
      **/
     template <char spin_component_name,
               typename old_spin_t,
-              template <typename = old_spin_t> class film_t>
-    [[nodiscard]] nanostructure_type<film_t, proxy_spin>
-    prepare_proxy_structure(nanostructure_type<film_t, old_spin_t> &system,
+              template <typename = old_spin_t> class lattice_t>
+    [[nodiscard]] nanostructure_type<lattice_t, proxy_spin>
+    prepare_proxy_structure(nanostructure_type<lattice_t, old_spin_t> &system,
                             typename qss::nanostructures::multilayer<
-                                film_t<
+                                lattice_t<
                                     qss::models::electron_dencity>> &n_up,
                             typename qss::nanostructures::multilayer<
-                                film_t<
+                                lattice_t<
                                     qss::models::electron_dencity>> &n_down)
     {
         auto result = copy_structure<proxy_spin>(system);
