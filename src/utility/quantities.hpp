@@ -4,7 +4,6 @@
 #include <type_traits>
 #include <numeric>
 #include <algorithm>
-#include <execution>
 
 #include "functions.hpp"
 
@@ -16,7 +15,7 @@ namespace qss
         using magn_t = typename lattice_t::value_t::magn_t;
         magn_t magn{};
         
-        magn = std::reduce(std::execution::par_unseq, lattice.begin(), lattice.end(), magn);
+        magn = std::reduce(lattice.begin(), lattice.end(), magn);
         return magn / static_cast<double>(lattice.get_amount_of_nodes());
     }
 
