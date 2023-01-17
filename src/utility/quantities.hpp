@@ -2,6 +2,9 @@
 #define QUANTITIES_HPP_INCLUDED
 
 #include <type_traits>
+#include <numeric>
+#include <algorithm>
+#include <execution>
 
 #include "functions.hpp"
 
@@ -12,13 +15,12 @@ namespace qss
     {
         using magn_t = typename lattice_t::value_t::magn_t;
         magn_t magn{};
-        for (const auto &elem : lattice)
-        {
-            magn += static_cast<magn_t>(elem);
-        }
+        
+        magn = std::reduce(std::execution::par_unseq, lattice.begin(), lattice.end(), magn);
         return magn / static_cast<double>(lattice.get_amount_of_nodes());
     }
 
+    /*
     template <typename lattice_t, typename borders_conditions_t>
     double calculate_energy(const lattice_t &lattice, borders_conditions_t borders_conditions)
     {
@@ -36,6 +38,7 @@ namespace qss
 
         return 0.5 * energy / static_cast<double>(lattice.get_amount_of_nodes());
     }
+    */
 }
 
 #endif
