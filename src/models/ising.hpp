@@ -69,6 +69,11 @@ namespace qss::inline models::ising
         return (rhs * lhs);
     }
 
+    inline std::string to_string(const magn &data) noexcept {
+        std::ostringstream stream{};
+        stream << "( " << data << " )";
+        return stream.str();
+    }
     inline std::ostream &operator<<(std::ostream &out, const spin &data) noexcept
     {
         out << "( " << data.value << " )";

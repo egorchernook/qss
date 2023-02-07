@@ -160,6 +160,12 @@ namespace qss::inline models::heisenberg
         result.z = lhs.z / rhs;
         return result;
     }
+    
+    inline std::string to_string(const magn &data) noexcept {
+        std::ostringstream stream{};
+        stream << "( " << data.x << " , " << data.y << " , " << data.z << " )";
+        return stream.str();
+    }
     inline std::ostream &operator<<(std::ostream &out, const spin &data) noexcept
     {
         out << "( " << data.x << " , " << data.y << " , " << data.z << " )";
