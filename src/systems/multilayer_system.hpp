@@ -11,9 +11,9 @@ namespace qss::inline nanostructures
     struct multilayer_system
     {
         multilayer_t nanostructure;
-        std::vector<typename multilayer_t::film_t::value_t::magn_t> magns;
-        std::vector<double> energies;
-        double T;
+        std::vector<typename multilayer_t::film_t::value_t::magn_t> magns{};
+        std::vector<double> energies{};
+        double T{0.0};
 
         [[nodiscard]] constexpr multilayer_system(multilayer_t &&structure) noexcept
             : nanostructure{std::move(structure)}
