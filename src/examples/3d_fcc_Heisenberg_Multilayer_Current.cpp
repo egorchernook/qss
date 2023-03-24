@@ -4,16 +4,17 @@
 #include <vector>
 
 #include "../algorithms/Metropolis.hpp"
-#include "../models/heisenberg.hpp"
-#include "../lattices/3d/fcc.hpp"
+#include "../algorithms/spin_transport.hpp"
 #include "../lattices/3d/3d.hpp"
+#include "../lattices/3d/fcc.hpp"
 #include "../lattices/borders_conditions.hpp"
-#include "../utility/quantities.hpp"
-#include "../utility/functions.hpp"
+#include "../models/electron_dencity.hpp"
+#include "../models/heisenberg.hpp"
 #include "../systems/multilayer.hpp"
 #include "../systems/multilayer_system.hpp"
-#include "../algorithms/spin_transport.hpp"
-#include "../models/electron_dencity.hpp"
+#include "../utility/functions.hpp"
+#include "../utility/quantities.hpp"
+
 
 int main()
 {
@@ -29,7 +30,7 @@ int main()
     constexpr static sizes_t sizes{64, 64, 3};
     constexpr static double J2 = -0.3;
     constexpr static double T_0 = 0.67;
-    constexpr static double T_s = 0.95; 
+    constexpr static double T_s = 0.95;
     multilayer_system<multilayer<lattice_t>> system{
         multilayer{{film<lattice_t>{lattice_t{spin_t{1.0, 0.0, 0.0}, sizes}, 1.0},
                     film<lattice_t>{lattice_t{spin_t{-1.0, 0.0, 0.0}, sizes}, 1.0}},
@@ -41,7 +42,7 @@ int main()
                        film<electron_dencity_t>{electron_dencity_t{ed_t{0.0}, sizes}, 1.0}},
                       {J2}};
 
-    auto sys = qss::spin_transport::prepare_proxy_structure<'x'>(system, n_up, n_down);
+    auto sys = qss::spin_transport::prepare_proxy_structure(system, n_up, n_down);
 
     constexpr static std::uint32_t mcs_amount = 3'000;
     constexpr static double Delta = 0.665;
@@ -75,28 +76,20 @@ int main()
             const auto [j_up, j_down] = qss::spin_transport::perform(sys);
             j_up_all += j_up / (sizes.x * sizes.y);
             j_down_all += j_down / (sizes.x * sizes.y);
-            out_j << mcs << "\t"
-                  << j_up_all << "\t"
-                  << j_down_all << std::endl;
+            out_j << mcs << "\t" << j_up_all << "\t" << j_down_all << std::endl;
         }
 
-        system.evolve([](const typename spin_t::magn_t &sum,
-                         const spin_t &spin_old,
-                         const spin_t &spin_new) -> double
-                      {
-                                auto diff = spin_old - spin_new;
-                                diff.y *= 0.8;
-                                diff.z *= (1.0 - Delta);
-                                return scalar_multiply(sum, diff); });
+        system.evolve([](const typename spin_t::magn_t &sum, const spin_t &spin_old, const spin_t &spin_new) -> double {
+            auto diff = spin_old - spin_new;
+            diff.y *= 0.8;
+            diff.z *= (1.0 - Delta);
+            return scalar_multiply(sum, diff);
+        });
         const auto magn1 = system.magns[0];
         const auto magn2 = system.magns[1];
 
-        out_magn << mcs << "\t"
-                 << abs(magn1) - abs(magn2) << "\t"
-                 << abs(magn1) << "\t"
-                 << magn1 << "\t"
-                 << abs(magn2) << "\t"
-                 << magn2 << std::endl;
+        out_magn << mcs << "\t" << abs(magn1) - abs(magn2) << "\t" << abs(magn1) << "\t" << magn1 << "\t" << abs(magn2)
+                 << "\t" << magn2 << std::endl;
     }
     out_magn.flush();
     out_j.flush();
