@@ -1,7 +1,11 @@
 #ifndef HEISENBERG_HPP_INLCUDE
 #define HEISENBERG_HPP_INLCUDE
 
+#include <fstream>
 #include <iostream>
+#include <sstream>
+#include <string>
+
 
 #include "../random/mersenne.hpp"
 #include "../random/random.hpp"

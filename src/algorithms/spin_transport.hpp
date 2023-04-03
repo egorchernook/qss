@@ -49,10 +49,6 @@ class proxy_spin
     {
         return *down;
     }
-    void set_val(double value_) noexcept
-    {
-        *value = value_;
-    }
     void set_up(typename qss::models::electron_dencity value_) noexcept
     {
         *up = value_;
@@ -192,7 +188,7 @@ result_t perform(nanostructure_type<film_t, proxy_spin> &system) noexcept
     {
         const auto coord = layers.template get_random_coord<random_t>();
         const double sum = layers.get_sum_of_closest_neighbours(coord);
-        const double E1 = sum - layers.get(coord);
+        const double E1 = sum - layers[static_cast<std::size_t>(coord.film_coord.z)].J * layers.get(coord);
 
         auto next_coord = coord;
         auto next_film_coord = coord.film_coord;
@@ -214,8 +210,10 @@ result_t perform(nanostructure_type<film_t, proxy_spin> &system) noexcept
         }
         else
         {
-            const auto diff = layers.get(next_coord) +
-                              layers.get(coord) / layers.get(coord).get_val() * layers.get(next_coord).get_val();
+            const auto diff = layers[static_cast<std::size_t>(next_coord.film_coord.z)].J * layers.get(next_coord) +
+                              layers[static_cast<std::size_t>(coord.film_coord.z)].J *
+                                  layers.get(next_coord).get_val() * layers.get(coord) / layers.get(coord).get_val();
+
             E2 = sum - diff;
         }
         const auto delta_E = E2 - E1;
