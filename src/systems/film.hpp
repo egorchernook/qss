@@ -50,11 +50,12 @@ template <ThreeD_Lattice lattice_t> struct film final : public lattice_t
         }
     }
 
-    // returns sum of replased elems
-    typename lattice_t::value_t::magn_t fill_plane(unsigned int z, const typename lattice_t::value_t &value)
+    // returns sum of replased elems and their amount
+    std::pair<typename lattice_t::value_t::magn_t, unsigned int> fill_plane(unsigned int z,
+                                                                            const typename lattice_t::value_t &value)
     {
         const auto patterns = qss::lattices::three_d::get_plane_XY(z);
-
+        auto amount = 0u;
         typename lattice_t::value_t::magn_t return_value{};
         for (const auto &pattern : patterns)
         {
@@ -71,12 +72,13 @@ template <ThreeD_Lattice lattice_t> struct film final : public lattice_t
                     if (exists)
                     {
                         return_value += this->get(coord);
+                        amount++;
                         this->set(value, coord);
                     }
                 }
             }
         }
-        return return_value;
+        return {return_value, amount};
     }
 };
 
