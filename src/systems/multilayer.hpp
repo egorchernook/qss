@@ -62,6 +62,14 @@ namespace qss::inline nanostructures
             }
             return this->at(coord.idx).get(coord.film_coord);
         }
+        void set(const coords_t &coord, const typename lattice_t::value_t& value)
+        {
+            if (coord.idx >= this->size())
+            {
+                throw std::out_of_range("coord.idx out of range : " + std::to_string(coord.idx) + " >= " + std::to_string(this->size()));
+            }
+            return this->at(coord.idx).set(value, coord.film_coord);
+        }
         template <typename random_t = qss::random::mersenne::random_t<>>
         multilayer_coords_t<lattice_t> get_random_coord() const noexcept
         {
