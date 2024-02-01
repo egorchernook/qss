@@ -1,0 +1,4 @@
+add_executable(2d_square_ising 2d_square_ising.cpp)
+add_executable(3d_fcc_Heisenberg 3d_fcc_Heisenberg.cpp)
+add_executable(3d_fcc_Heisenberg_Multilayer 3d_fcc_Heisenberg_Multilayer.cpp)
+add_executable(3d_fcc_Heisenberg_Multilayer_Current 3d_fcc_Heisenberg_Multilayer_Current.cpp)

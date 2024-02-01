@@ -7,6 +7,7 @@
 #include <cmath>
 #include <cstdint>
 #include <iostream>
+#include <sstream>
 
 namespace qss::inline models::ising
 {
