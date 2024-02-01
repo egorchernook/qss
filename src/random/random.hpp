@@ -1,21 +1,23 @@
 #ifndef RANDOM_HPP_INCLUDED
 #define RANDOM_HPP_INCLUDED
 
-#include <concepts>
+// #include <concepts>
 #include <chrono>
 #include <cmath>
 #include <stdexcept>
 
+#define Random typename // to migrate to c++17
+
 namespace qss
 {
-    template <typename T>
-    concept Random = requires (T rand) {
-        { rand() } -> std::convertible_to<double>;
-        { rand(0.0, 1.0) } -> std::convertible_to<double>;
-        { rand(0, 2) } -> std::convertible_to<int>;
-        { rand.get_angle_2pi() } -> std::convertible_to<double>;
-        { rand.get_angle_pi() } -> std::convertible_to<double>;
-    };
+    // template <typename T>
+    // concept Random = requires (T rand) {
+    //     { rand() } -> std::convertible_to<double>;
+    //     { rand(0.0, 1.0) } -> std::convertible_to<double>;
+    //     { rand(0, 2) } -> std::convertible_to<int>;
+    //     { rand.get_angle_2pi() } -> std::convertible_to<double>;
+    //     { rand.get_angle_pi() } -> std::convertible_to<double>;
+    // };
 
     namespace random 
     {

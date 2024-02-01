@@ -5,7 +5,7 @@
 #include <type_traits>
 #include <iterator>
 #include <optional>
-#include <concepts>
+// #include <concepts>
 
 #include "2d/2d.hpp"
 #include "2d/square.hpp"
@@ -15,8 +15,8 @@
 namespace qss::borders_conditions
 {
     template <typename coord_size_t, typename size_type>
-        requires std::is_convertible_v<coord_size_t, int> &&
-                 std::is_convertible_v<size_type, int>
+        // requires std::is_convertible_v<coord_size_t, int> &&
+        //          std::is_convertible_v<size_type, int>
     struct linear_border_conditions
     {
         using coord_size_type = coord_size_t;
@@ -54,10 +54,10 @@ namespace qss::borders_conditions
     };
 
     template <typename x_conds_t, typename y_conds_t>
-        requires std::is_same_v<typename x_conds_t::coord_size_type,
-                                typename y_conds_t::coord_size_type> &&
-                 std::is_same_v<typename x_conds_t::sizes_size_type,
-                                typename y_conds_t::sizes_size_type>
+        // requires std::is_same_v<typename x_conds_t::coord_size_type,
+        //                         typename y_conds_t::coord_size_type> &&
+        //          std::is_same_v<typename x_conds_t::sizes_size_type,
+        //                         typename y_conds_t::sizes_size_type>
     [[nodiscard]] std::optional<typename qss::lattices::two_d::square_coords_t>
     use_border_conditions(const typename qss::lattices::two_d::square_coords_t &coord,
                           const typename qss::lattices::two_d::sizes_t &sizes) noexcept
@@ -76,14 +76,14 @@ namespace qss::borders_conditions
     }
 
     template <typename x_conds_t, typename y_conds_t, typename z_conds_t>
-        requires std::is_same_v<typename x_conds_t::coord_size_type,
-                                typename y_conds_t::coord_size_type> &&
-                 std::is_same_v<typename y_conds_t::coord_size_type,
-                                typename z_conds_t::coord_size_type> &&
-                 std::is_same_v<typename x_conds_t::sizes_size_type,
-                                typename y_conds_t::sizes_size_type> &&
-                 std::is_same_v<typename y_conds_t::sizes_size_type,
-                                typename z_conds_t::sizes_size_type>
+        // requires std::is_same_v<typename x_conds_t::coord_size_type,
+        //                         typename y_conds_t::coord_size_type> &&
+        //          std::is_same_v<typename y_conds_t::coord_size_type,
+        //                         typename z_conds_t::coord_size_type> &&
+        //          std::is_same_v<typename x_conds_t::sizes_size_type,
+        //                         typename y_conds_t::sizes_size_type> &&
+        //          std::is_same_v<typename y_conds_t::sizes_size_type,
+        //                         typename z_conds_t::sizes_size_type>
     [[nodiscard]] std::optional<typename qss::lattices::three_d::fcc_coords_t>
     use_border_conditions(const typename qss::lattices::three_d::fcc_coords_t &coord,
                           const typename qss::lattices::three_d::sizes_t &sizes)

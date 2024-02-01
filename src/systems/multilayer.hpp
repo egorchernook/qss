@@ -5,7 +5,7 @@
 #include <cstdint>
 #include <initializer_list>
 #include <stdexcept>
-#include <concepts>
+// #include <concepts>
 #include <algorithm>
 #include <utility>
 #include <type_traits>
@@ -202,7 +202,7 @@ namespace qss::inline nanostructures
     template <typename spin_t,
               typename old_spin_t,
               template <typename = old_spin_t> class lattice_t>
-        requires ThreeD_Lattice<lattice_t<old_spin_t>>
+        // requires ThreeD_Lattice<lattice_t<old_spin_t>>
     [[nodiscard]] constexpr multilayer<lattice_t<spin_t>>
     copy_structure(const multilayer<lattice_t<old_spin_t>> &original) noexcept
     {

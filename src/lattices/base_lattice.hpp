@@ -1,9 +1,11 @@
 #ifndef BASE_LATTICE_HPP_INCLUDED
 #define BASE_LATTICE_HPP_INCLUDED
 
-#include <concepts>
+// #include <concepts>
 #include <type_traits>
 #include <vector>
+
+#define Lattice typename // to migrate to c++17
 
 namespace qss::lattices
 {
@@ -47,15 +49,15 @@ namespace qss::lattices
         virtual void bounds_check(const coords_t &coords) const = 0;
     };
 
-    template <typename T>
-    concept Lattice = std::is_base_of_v<
-                          base_lattice_t<typename T::value_t, typename T::coords_t>,
-                          T> &&
-                      requires(T obj) {
-                          {
-                              obj.choose_random_node()
-                              } -> std::convertible_to<typename T::coords_t>;
-                      };
+    // template <typename T>
+    // concept Lattice = std::is_base_of_v<
+    //                       base_lattice_t<typename T::value_t, typename T::coords_t>,
+    //                       T> &&
+    //                   requires(T obj) {
+    //                       {
+    //                           obj.choose_random_node()
+    //                           } -> std::convertible_to<typename T::coords_t>;
+    //                   };
 
     template <typename spin_t,
               typename old_spin_t,

@@ -1,7 +1,7 @@
 #ifndef SPIN_TRANSPORT_HPP_INCLUDED
 #define SPIN_TRANSPORT_HPP_INCLUDED
 
-#include <concepts>
+// #include <concepts>
 #include <numeric>
 #include <stdexcept>
 
@@ -117,7 +117,7 @@ namespace qss::inline algorithms::spin_transport
     }
 
     template <template <typename> class lattice_t, typename spin_t>
-        requires qss::nanostructures::ThreeD_Lattice<lattice_t<spin_t>>
+        // requires qss::nanostructures::ThreeD_Lattice<lattice_t<spin_t>>
     using nanostructure_type = qss::nanostructures::multilayer_system<qss::nanostructures::multilayer<lattice_t<spin_t>>>;
 
     /*  proxy структура ТОЛЬКО для использования в функции spin_transport
