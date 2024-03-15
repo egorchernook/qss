@@ -198,6 +198,18 @@ inline double abs(const magn& val) noexcept
 {
     return std::sqrt(val.x * val.x + val.y * val.y + val.z * val.z);
 }
+inline double abs(magn&& val) noexcept
+{
+    return std::sqrt(val.x * val.x + val.y * val.y + val.z * val.z);
+}
+inline double cos_of_angle(const magn& fst, const magn& snd) noexcept 
+{
+    return scalar_multiply(fst, snd) / (abs(fst) * abs(snd));
+}
+inline double cos_of_angle(magn&& fst, magn&& snd) noexcept 
+{
+    return scalar_multiply(fst, snd) / (abs(fst) * abs(snd));
+}
 } // namespace heisenberg
 } // namespace models
 } // namespace qss
