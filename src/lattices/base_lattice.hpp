@@ -24,8 +24,8 @@ namespace qss::lattices
         using container_t::rbegin;
         using container_t::rend;
 
-        base_lattice_t(const base_lattice_t&) noexcept = default;
-        base_lattice_t(base_lattice_t&&) noexcept = default;
+        // base_lattice_t(const base_lattice_t&) noexcept = default;
+        // base_lattice_t(base_lattice_t&&) noexcept = default;
 
         using value_t = node_t;
         using coords_t = coordinates_t;

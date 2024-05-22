@@ -27,12 +27,17 @@ struct film final : public lattice_t {
         sharp<typename lattice_t::coords_t::size_type, typename lattice_t::sizes_t::size_type>;
     double J;
 
-    film(const lattice_t& lattice, double J_ = 1.0)
+    film(const film& other) noexcept
+        : lattice_t{other}
+        , J{other.J} {};
+
+    film(const lattice_t& lattice, double J_ = 1.0) noexcept
         : lattice_t{lattice}
         , J{J_} {};
-    film(lattice_t&& lattice, double J_ = 1.0) noexcept
-        : lattice_t{std::move(lattice)}
-        , J{J_} {};
+
+    // film(lattice_t&& lattice, double J_ = 1.0) noexcept
+    //     : lattice_t{std::move(lattice)}
+    //     , J{J_} {};
 
     typename lattice_t::sizes_t::size_type
     get_last_z(const typename qss::lattices::three_d::fcc_coords_t& coord) const
