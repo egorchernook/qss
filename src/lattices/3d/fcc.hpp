@@ -203,9 +203,6 @@ namespace qss::lattices::three_d
     public:
         const std::array<sizes_t, 4> sublattices_sizes; // размеры подрешёток
 
-        face_centric_cubic(const face_centric_cubic& other) 
-            : base_t{other}, sizes{other.sizes} {};
-
         constexpr face_centric_cubic(const value_t &initial_spin,
                                      const typename sizes_t::size_type &size_x,
                                      const typename sizes_t::size_type &size_y,
